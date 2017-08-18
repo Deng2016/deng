@@ -1,0 +1,9 @@
+.idea
+.iml
+*.log
+*.out
+*.pyc
+*.zip
+*.tgz
+*.tar.gz
+*.txt
