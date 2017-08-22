@@ -7,6 +7,5 @@
 *.tgz
 *.tar.gz
 *.txt
-fabfile.py
 build
 deng.egg-info
