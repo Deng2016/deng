@@ -26,7 +26,7 @@ def update():
                         except:
                             pass
                         print(blue("部署：部署新版"))
-                        run("python setup.py install")
+                        run("python setup.py install && pip show deng")
                 else:
                     try:
                         print(blue("部署：删除旧版"))
@@ -34,7 +34,7 @@ def update():
                     except:
                         pass
                     print(blue("部署：部署新版"))
-                    run("python setup.py install")
+                    run("python setup.py install && pip show deng")
             print(blue("部署：删除源码"))
             run("rm -rf ~/deng")
         print(blue("完成部署: %s, %s" % (server["host"], server["virtualenv"])))
