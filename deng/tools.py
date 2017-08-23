@@ -31,11 +31,7 @@ class Tools(object):
                 print "========请求体信息========"
                 print "请求URL地址：%s" % res.request.url
                 print "请求头："
-                try:
-                    print json.dumps(res.request.headers, ensure_ascii=False, indent=4)
-                except Exception, e:
-                    print res.request.headers
-                    print e
+                print res.request.headers
                 print "请求体："
                 if isinstance(res.request.body, (dict, list, tuple)):
                     print json.dumps(res.request.body, ensure_ascii=False, indent=4)
