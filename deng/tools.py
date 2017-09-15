@@ -6,7 +6,9 @@ Created on 2016年1月28日
 """
 import os
 import json 
-import time 
+import time
+import random
+import string
 import tarfile
 from dateutil.parser import parser
 from requests.models import Response
@@ -35,6 +37,11 @@ class Tools(object):
                 print "请求体："
                 if isinstance(res.request.body, (dict, list, tuple)):
                     print json.dumps(res.request.body, ensure_ascii=False, indent=4)
+                # elif isinstance(res.request.body, str):
+                #     try:
+                #         print json.loads(res.request.body)
+                #     except:
+                #         print res.request.body
                 else:
                     print res.request.body
                 print "========响应体信息========"
@@ -63,6 +70,8 @@ class Tools(object):
             print tostring(res)
         elif isinstance(res, CaseInsensitiveDict):
             print json.dumps(dict(res), ensure_ascii=False, indent=4)
+        elif res is None:
+            print "res对象为空！"
         else:
             print "非预期类型，对象类型为：", type(res)
             print res
@@ -111,12 +120,25 @@ class Tools(object):
         pass
     
     @staticmethod
-    def get_params_dict(params):
-        if 'self' in params:
-            del params['self']
-        if 'url' in params:
-            del params['url']
-        return params 
+    def get_params_dict(params, ignores=[]):
+        """获取函数所有的参数，并以字典形式返回
+        :param params: 函数中调用时通常传入locals()
+        :param ignores: 忽略掉某些参数
+        :return: 参数字典
+        """
+        if isinstance(ignores, str):
+            ignores = [ignores]
+        ignores.extend(["self", "cls", "args", "url"])
+
+        for keys_ in ignores:
+            if keys_ in params:
+                del params[keys_]
+
+        if "kwargs" in params:
+            temp_dict = params["kwargs"]
+            del params["kwargs"]
+            params = dict(params, **temp_dict)
+        return params
     
     @staticmethod 
     def get_digit(params=None):
@@ -160,3 +182,22 @@ class Tools(object):
         for name in names:
             tar.extract(name, path=".")
         tar.close()
+
+    @staticmethod
+    def gen_phone_on():
+        """生成随机手机号码"""
+        phone_head = [130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+                      150, 151, 152, 155, 158,
+                      170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
+                      181, 186, 187, 188, 189]
+        phone_on = str(random.choice(phone_head)) + "".join(
+            random.choice("0123456789") for i in range(8))
+        return phone_on
+
+    @staticmethod
+    def gen_phone_serial_no():
+        """生成手机串号"""
+        serial_no = "".join(random.choice(string.ascii_uppercase) for i in range(4))
+        serial_no += "-" + "".join(random.choice(string.ascii_uppercase) for i in range(4))
+        serial_no += "-" + "".join(random.choice(string.digits) for i in range(5))
+        return serial_no
