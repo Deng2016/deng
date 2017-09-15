@@ -13,7 +13,7 @@ servers = [
 def update():
     """将新push的脚本更新到jenkins上"""
     for server in servers:
-        print(blue("\n\n开始部署: %s, %s" % (server["host"], server["virtualenv"])))
+        print(blue("\n\n开始部署 主机: %s, 虚拟环境：%s" % (server["host"], server["virtualenv"])))
         with settings(forward_agend=True, use_ssh_config=True, host_string=server["host"], colorize_errors=True):
             print(blue("部署：下载源码"))
             run("rm -rf ~/deng")
@@ -25,7 +25,7 @@ def update():
                             print(blue("部署：删除旧版"))
                             run("pip uninstall -y deng")
                         except:
-                            pass
+                            print red("删除原有deng包报错，忽略！")
                         print(blue("部署：部署新版"))
                         run("python setup.py install")
                         print(blue("查看deng包信息"))
@@ -35,11 +35,12 @@ def update():
                         print(blue("部署：删除旧版"))
                         run("pip uninstall -y deng")
                     except:
-                        pass
+                        print red("删除原有deng包报错，忽略！")
                     print(blue("部署：部署新版"))
                     run("python setup.py install")
                     print(blue("查看deng包信息"))
                     run("pip show deng")
+
             print(blue("部署：删除源码"))
             run("rm -rf ~/deng")
         print(blue("完成部署: %s, %s" % (server["host"], server["virtualenv"])))

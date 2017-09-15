@@ -120,7 +120,7 @@ class Tools(object):
         pass
     
     @staticmethod
-    def get_params_dict(params, ignores=[]):
+    def get_params_dict(params, ignores=None):
         """获取函数所有的参数，并以字典形式返回
         :param params: 函数中调用时通常传入locals()
         :param ignores: 忽略掉某些参数
@@ -128,7 +128,9 @@ class Tools(object):
         """
         if isinstance(ignores, str):
             ignores = [ignores]
-        ignores.extend(["self", "cls", "args", "url"])
+        if ignores is None:
+            ignores = []
+        ignores.extend(["self", "cls", "args"])
 
         for keys_ in ignores:
             if keys_ in params:
