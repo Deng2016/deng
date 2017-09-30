@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# coding=utf-8
 import sys 
 import Queue 
 import threading
@@ -8,7 +8,6 @@ from requests import ConnectionError
 
 
 class MultiThreading(object):
-    # http://www.cnblogs.cn/qualitysong/archive/2011/05/27/2060246.html
     def __init__(self, func_list=None):
         # 所有线程函数的返回值汇总，如果最后为0，说明全部成功
         self.ret_flag = 0
@@ -17,13 +16,15 @@ class MultiThreading(object):
          
     def set_thread_func_list(self, func_list):
         """
-        @note: func_list是一个list，每个元素是一个dict，有func和args两个参数，func为函数引用，args为元组
+        @note: func_list是一个list，每个元素是一个dict，
+        有func和args两个参数，func为函数引用，args为元组
         """
         self.func_list = func_list
         
     def trace_func(self, func, *args, **kwargs):
         """
-        @note:替代profile_func，新的跟踪线程返回值的函数，对真正执行的线程函数包一次函数，以获取返回值
+        @note:替代profile_func，新的跟踪线程返回值的函数，
+        对真正执行的线程函数包一次函数，以获取返回值
         """
         ret = func(*args, **kwargs)
         self.ret_flag += ret
@@ -38,7 +39,8 @@ class MultiThreading(object):
         for func_dict in self.func_list:
             if count is None:
                 if func_dict["args"]:
-                    t = threading.Thread(target=func_dict["func"], args=func_dict["args"])
+                    t = threading.Thread(target=func_dict["func"],
+                                         args=func_dict["args"])
                 else:
                     t = threading.Thread(target=func_dict["func"])
             else:
@@ -48,9 +50,11 @@ class MultiThreading(object):
                     for arg in func_dict["args"]:
                         new_arg_list.append(arg)
                     new_arg_tuple = tuple(new_arg_list)
-                    t = threading.Thread(target=self.trace_func, args=new_arg_tuple)
+                    t = threading.Thread(target=self.trace_func,
+                                         args=new_arg_tuple)
                 else:
-                    t = threading.Thread(target=self.trace_func, args=(func_dict["func"],))
+                    t = threading.Thread(target=self.trace_func,
+                                         args=(func_dict["func"],))
             self.threads.append(t)
      
         for thread_obj in self.threads:
@@ -72,46 +76,35 @@ class MyThread(threading.Thread):
         # 线程从工作队列中取任务超时时间
         self.timeout = timeout 
         self.setDaemon(True) 
-        self.work_queue = work_queue
-        self.result_queue = result_queue
+        self.work_queue = work_queue 
+        self.result_queue = result_queue 
         self.start()
         
     def run(self):
         while True:
             try:
                 # 从工作队列中获取任务
-                callable, args, kwargs = self.work_queue.get(timeout=self.timeout)
-                # print "运行错误： %s args=%s, kwargs=%s"%(callable, args, kwargs)
-                # try:
+                func, args, kwargs = self.work_queue.get(timeout=self.timeout)
                 # 执行任务
-                res = callable(*args, **kwargs)  
+                res = func(*args, **kwargs)
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), int(time()), res))
-                # except Exception, e:
-                #     print "运行错误： %s args=%s, kwargs=%s"%(callable, args, kwargs)
-                #     print e
             except Queue.Empty:
                 break
             except ConnectionError:
                 print "连接被拒绝，重试……"
-                # print args, kwargs
-                # res = callable(*args, **kwargs)
-            except:
+            except Exception as e:
                 print sys.exc_info()
-                raise
-            # finally:
-            #     sys.exit()
-            #     pass
+                print e
 
 
 class ThreadPool(object):
     def __init__(self):
-        self.work_queue = Queue.Queue()
-        self.result_queue = Queue.Queue()
+        self.work_queue = Queue.Queue() 
+        self.result_queue = Queue.Queue() 
         self.threads = []
-        # self.__create_thread_pool(num_of_threads, timeout)
         
-    def create_thread_pool(self, num_of_threads, timeout):
+    def create_threadpool(self, num_of_threads, timeout):
         """
         @note:创建线程池
         """
@@ -119,10 +112,9 @@ class ThreadPool(object):
         starttime = int(time()) 
         for i in range(num_of_threads):
             thread = MyThread(self.work_queue, self.result_queue, timeout)
-            # thread = MyThread(1, 1, timeout)
             self.threads.append(thread)
         # 设置等待所有子线程完成
-        self.__wait_for_complete()
+        self._wait_for_complete()
         endtime = int(time())
         print "========================="
         print "总计请求数：", request_count
@@ -130,10 +122,10 @@ class ThreadPool(object):
         print "endtime  :", endtime 
         print "运行总耗时：", endtime - starttime
         print "成功处理了", self.result_queue.qsize(), "次请求！"
-        print "=========================\n\n"
-        return self.result_queue
+        print "========================="
+        return self.result_queue 
       
-    def __wait_for_complete(self):
+    def _wait_for_complete(self):
         """
         @note:等待所有线程完成
         """
@@ -144,8 +136,8 @@ class ThreadPool(object):
                 # 判断线程是否存在来决定是否调用join
                 thread.join()
      
-    def add_job(self, callable, *args, **kwargs):
+    def add_job(self, func, *args, **kwargs):
         """
         @note:往工作队列中添加任务
         """
-        self.work_queue.put((callable, args, kwargs))
+        self.work_queue.put((func, args, kwargs))
