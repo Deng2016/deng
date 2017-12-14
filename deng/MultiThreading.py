@@ -108,6 +108,8 @@ class ThreadPool(object):
         """
         @note:创建线程池
         """
+        print "本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
+                                                timeout)
         request_count = self.work_queue.qsize()
         starttime = int(time()) 
         for i in range(num_of_threads):

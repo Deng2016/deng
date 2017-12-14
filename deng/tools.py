@@ -3,6 +3,7 @@
 """
 Created on 2016年1月28日
 @author: dengqingyong
+@email: yu12377@163.com
 """
 import os
 import json 
@@ -17,10 +18,9 @@ from xml.etree.ElementTree import Element, tostring
 
 
 class Tools(object):
-    """个人封闭的常用方法
+    """个人封装的常用方法
         方法列表：
             format_print：格式化输出
-
     """
 
     @staticmethod    
@@ -37,11 +37,6 @@ class Tools(object):
                 print "请求体："
                 if isinstance(res.request.body, (dict, list, tuple)):
                     print json.dumps(res.request.body, ensure_ascii=False, indent=4)
-                # elif isinstance(res.request.body, str):
-                #     try:
-                #         print json.loads(res.request.body)
-                #     except:
-                #         print res.request.body
                 else:
                     print res.request.body
                 print "========响应体信息========"
@@ -101,8 +96,8 @@ class Tools(object):
         return ftime.strftime('%Y-%m-%d %H:%M:%S')
     
     @staticmethod
-    def get_current_time(format=None):
-        if format.lower() == "short":
+    def get_current_time(_format="long"):
+        if _format.lower() == "short":
             return time.strftime("%Y-%m-%d", time.localtime(time.time()))
         else:
             return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
