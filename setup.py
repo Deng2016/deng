@@ -15,5 +15,6 @@ setup(
     install_requires=[
         "requests>=2.18.2",
         "python-dateutil>=1.5",
-    ]
+        "MySQL-python>=1.2.5",
+        "DBUtils>=1.2"]
 )

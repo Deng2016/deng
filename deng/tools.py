@@ -49,7 +49,7 @@ class Tools(object):
                 res = list(res)
             try:
                 print(json.dumps(res, ensure_ascii=False, indent=4))
-                print("长度：", len(res))
+                print(u"长度：", len(res))
             except ValueError as e:
                 print(res)
                 print(e)

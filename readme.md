@@ -1,5 +1,10 @@
 # 个人常用工具类封装
 
+## 更新历史
+
+#### 2018-02-27
+* 新增mysql连接池类MysqlPool；
+
 ## 远程pip安装
 ```
 pip install git+https://github.com/Deng2016/deng@201801
