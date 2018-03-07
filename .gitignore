@@ -5,8 +5,6 @@
 *.out
 *.pyc
 *.zip
-*.tgz
-*.tar.gz
 *.txt
 build
 deng.egg-info
