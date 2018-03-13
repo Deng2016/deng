@@ -16,7 +16,7 @@ except ImportError as e:
 try:
     from DBUtils.PooledDB import PooledDB
 except ImportError as e:
-    print(e.m)
+    print(e.message)
     import os
     os.system('pip install DBUtils')
     from DBUtils.PooledDB import PooledDB
