@@ -5,8 +5,21 @@
 邮箱：yu12377@163.com
 时间：2018/2/26 22:34
 """
-import MySQLdb
-from DBUtils.PooledDB import PooledDB
+try:
+    import MySQLdb
+except ImportError as e:
+    print(e.message)
+    import os
+    os.system('pip install mysql-python')
+    import MySQLdb
+
+try:
+    from DBUtils.PooledDB import PooledDB
+except ImportError as e:
+    print(e.m)
+    import os
+    os.system('pip install DBUtils')
+    from DBUtils.PooledDB import PooledDB
 
 
 class MysqlPool(object):

@@ -1,5 +1,10 @@
 # 个人常用工具类封装
 
+## 依赖包安装说明  
+**注意：mac系统或是linux系统跳过此步骤**    
+[windows64位系统安装mysql-python跳坑说明](http://blog.csdn.net/yu12377/article/details/79525470)    
+> 本包中mysql连接池类用到了mysql-python包，上述指引是mysql-python包的安装说明 
+
 ## 更新历史
 
 #### 2018-02-27
