@@ -82,8 +82,9 @@ TestData.get_phone_on()
 TestData.get_phone_serial_no()
 ```
 
-### 4. [工具百宝箱-tools.py](deng/tools.py)
-```python 
+### 4. [工具百宝箱-tools.py](deng/tools.py)  
+```python
+# 导入Tools类
 from deng.tools import Tools 
 
 # 格式化输出: 可以处理dist, list, tuple, set, requests.response对象, xml.etree.ElementTree.Element对象
@@ -92,14 +93,51 @@ Tools.format_print(res)
 # 对字典，列表，字符串进行排序
 Tools.sort_custom()
 
-# 获取时间
+# 获取时间戳
+# 参数length长度，默认10，取值有10，13
+# 参数offset偏移量，单位为秒
 Tools.get_timestamp()
+
+# 获取当前时间，参数
+# format：默认long，取值有long，short
+# offset：默认0，单位为秒
+Tools.get_current_time()
+
+# 从键盘上获取一个数字，并做异常处理
+Tools.get_digit()
 ```
+
 ### 5. [彩色输出-colors.py](deng/colors.py)
+```python
+# 导入所有颜色
+from deng.colors import * 
+
+# 红色
+print(red('红色'))
+
+# 绿色
+print(green('绿色'))
+
+# 黄色
+print(yellow('黄色'))
+
+# 蓝色
+print(blue('蓝色'))
+```
 
 ### 6. [图片处理工具类-colors.py](deng/image.py)
 
 ### 7. [邮件处理工具-mailTool.py](deng/mailTool.py)
+```python
+# 导入MailTool类
+from deng.mailTool import MailTool
+
+# 实例化邮件对象
+mail = MailTool(send_username='xxx', send_password='xxx', send_smtp='stmp.qq.com')
+
+# 发送邮件
+mail.send(receiver='接收人邮箱', subject='邮件主题', content='邮件正文', attachs='邮件附件路径')
+```
 
 ## 依赖包安装说明  
 **注意：mac系统或是linux系统跳过此步骤**    
