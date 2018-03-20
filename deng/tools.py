@@ -8,6 +8,7 @@ Created on 2016年1月28日
 import os
 import json 
 import time
+import socket
 import random
 import string
 import tarfile
@@ -207,3 +208,27 @@ class Tools(object):
         serial_no += "-" + "".join(random.choice(string.ascii_uppercase) for i in range(4))
         serial_no += "-" + "".join(random.choice(string.digits) for i in range(5))
         return serial_no
+
+    @staticmethod
+    def is_valid_ip(ip):
+        """Returns true if the given string is a well-formed IP address.
+        Supports IPv4 and IPv6.
+        """
+        # IP地址必须是字符串
+        if not isinstance(ip, (str, unicode)):
+            return False
+
+        if not ip or '\x00' in ip:
+            # getaddrinfo resolves empty strings to localhost, and truncates
+            # on zero bytes.
+            return False
+        try:
+            res = socket.getaddrinfo(ip, 0, socket.AF_UNSPEC,
+                                     socket.SOCK_STREAM,
+                                     0, socket.AI_NUMERICHOST)
+            return bool(res)
+        except socket.gaierror as e:
+            if e.args[0] == socket.EAI_NONAME:
+                return False
+            raise
+        return True
