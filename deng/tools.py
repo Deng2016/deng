@@ -232,3 +232,15 @@ class Tools(object):
                 return False
             raise
         return True
+
+    @staticmethod
+    def to_dict(body_str):
+        """将x-www-form-urlencoded格式字符串转换成dict"""
+        from urllib import unquote
+        body_str = unquote(body_str)
+        items = body_str.split('&')
+        payload = {}
+        for item in items:
+            key, values = item.split('=')
+            payload[key] = values
+        return payload
