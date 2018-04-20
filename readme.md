@@ -3,8 +3,11 @@
 
 ## 更新历史
 
-#### 2018-02-27
-* 新增mysql连接池类MysqlPool；
+### 2018-04-20  
+* 新增to_dict方法，将x-www-form-urlencoded格式字符串转换成dict  
+
+### 2018-02-27  
+* 新增mysql连接池类MysqlPool；  
 
 ## API文档
 ### 1. [mysql连接池-dbConnect.py](deng/dbConnect.py)
