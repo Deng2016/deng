@@ -25,7 +25,7 @@ def update():
                             print(blue("部署：删除旧版"))
                             run("pip uninstall -y deng")
                         except:
-                            print red("删除原有deng包报错，忽略！")
+                            print(red("删除原有deng包报错，忽略！"))
                         print(blue("部署：部署新版"))
                         run("pwd")
                         run("python setup.py install")
@@ -36,7 +36,7 @@ def update():
                         print(blue("部署：删除旧版"))
                         run("pip uninstall -y deng")
                     except:
-                        print red("删除原有deng包报错，忽略！")
+                        print(red("删除原有deng包报错，忽略！"))
                     print(blue("部署：部署新版"))
                     run("python setup.py install")
                     print(blue("查看deng包信息"))

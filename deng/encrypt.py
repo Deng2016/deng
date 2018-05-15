@@ -1,9 +1,10 @@
 #-*- coding:utf-8 -*-
 import sys
-reload( sys )
+import imp
+imp.reload( sys )
 sys.setdefaultencoding('utf-8')
 import json
-from urllib import urlencode
+from urllib.parse import urlencode
 import requests
 
 class encrypt(object):
@@ -22,7 +23,7 @@ class encrypt(object):
     # 参数升序排序及拼接
     def join_array(self,param):
         str_data='' 
-        sorted_x = sorted(param.iteritems(), key=lambda param : param[0])
+        sorted_x = sorted(iter(param.items()), key=lambda param : param[0])
         for tuple in sorted_x:
             str_data+=str(tuple[0])+str(tuple[1])
         return str_data

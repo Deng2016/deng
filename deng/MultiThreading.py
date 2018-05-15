@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 import sys 
-import Queue 
+import queue 
 import threading
 from time import time
 from requests import ConnectionError
@@ -89,27 +89,27 @@ class MyThread(threading.Thread):
                 res = func(*args, **kwargs)
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), int(time()), res))
-            except Queue.Empty:
+            except queue.Empty:
                 break
             except ConnectionError:
-                print "连接被拒绝，重试……"
+                print("连接被拒绝，重试……")
             except Exception as e:
-                print sys.exc_info()
-                print e
+                print(sys.exc_info())
+                print(e)
 
 
 class ThreadPool(object):
     def __init__(self):
-        self.work_queue = Queue.Queue() 
-        self.result_queue = Queue.Queue() 
+        self.work_queue = queue.Queue() 
+        self.result_queue = queue.Queue() 
         self.threads = []
         
     def create_threadpool(self, num_of_threads, timeout):
         """
         @note:创建线程池
         """
-        print "本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
-                                                timeout)
+        print("本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
+                                                timeout))
         request_count = self.work_queue.qsize()
         starttime = int(time()) 
         for i in range(num_of_threads):
@@ -118,13 +118,13 @@ class ThreadPool(object):
         # 设置等待所有子线程完成
         self._wait_for_complete()
         endtime = int(time())
-        print "========================="
-        print "总计请求数：", request_count
-        print "starttime:", starttime
-        print "endtime  :", endtime 
-        print "运行总耗时：", endtime - starttime
-        print "成功处理了", self.result_queue.qsize(), "次请求！"
-        print "========================="
+        print("=========================")
+        print("总计请求数：", request_count)
+        print("starttime:", starttime)
+        print("endtime  :", endtime) 
+        print("运行总耗时：", endtime - starttime)
+        print("成功处理了", self.result_queue.qsize(), "次请求！")
+        print("=========================")
         return self.result_queue 
       
     def _wait_for_complete(self):

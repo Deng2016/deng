@@ -30,9 +30,9 @@ class MailTool(object):
         """初始化实例,需要提供发送方信息:发送smtp服务器,用户名,密码等"""
         self.echo = echo
         if self.echo:
-            print "send_smtp=%s" % send_smtp
-            print "send_username=%s" % send_username
-            print "send_password=%s" % send_password
+            print("send_smtp=%s" % send_smtp)
+            print("send_username=%s" % send_username)
+            print("send_password=%s" % send_password)
         self.send_smtp = send_smtp
         self.send_username = send_username
         self.send_password = send_password
@@ -62,12 +62,12 @@ class MailTool(object):
                 if exists(attach):
                     msg = self._add_attach(msg, attach)
                 else:
-                    print "附件不存在, 跳过: %s" % attach
+                    print("附件不存在, 跳过: %s" % attach)
         else:
             if exists(attachs):
                 msg = self._add_attach(msg, attachs)
             else:
-                print "附件不存在, 跳过: %s" % attachs
+                print("附件不存在, 跳过: %s" % attachs)
         return msg
 
     def send(self, receiver, subject, content, mail_charset="utf-8", attachs=None, echo=False):
@@ -81,22 +81,22 @@ class MailTool(object):
                 attachs:附件路径列表
         """
         # 字符串单收件人时转换成列表格式
-        if isinstance(receiver, (str, unicode)):
+        if isinstance(receiver, str):
             receiver = [receiver]
         # 收件人格式检查
         if not isinstance(receiver, (tuple, list)):
-            print red("参数receiver格式不正确!")
-            print red("receiver预期格式：str、tuple或list")
-            print red("receiver实际格式：%s" % type(receiver))
+            print(red("参数receiver格式不正确!"))
+            print(red("receiver预期格式：str、tuple或list"))
+            print(red("receiver实际格式：%s" % type(receiver)))
         # 接收人receiver去重
         if isinstance(receiver, (tuple, list)):
             receiver = list(set(receiver))
 
         # 邮件长度检查，超大时只截取前5000个字符
         if len(content) > 5000:
-            print yellow("邮件长度：%d" % len(content))
-            print yellow("请注意邮件内容过多，可能会被过滤掉！")
-            print yellow("自动截取前5000个字符，后面的忽略……")
+            print(yellow("邮件长度：%d" % len(content)))
+            print(yellow("请注意邮件内容过多，可能会被过滤掉！"))
+            print(yellow("自动截取前5000个字符，后面的忽略……"))
             content = content[:5000]
 
         # msg = MIMEMultipart("alternative")
@@ -125,10 +125,10 @@ class MailTool(object):
 
         # 日志显示
         if self.echo or echo:
-            print "邮件发送人：%s" % self.send_username
-            print "邮件接送人：%s" % receiver
-            print "邮件标题：%s" % subject
+            print("邮件发送人：%s" % self.send_username)
+            print("邮件接送人：%s" % receiver)
+            print("邮件标题：%s" % subject)
             if str(echo).lower() == "vv":
-                print "邮件内容：%s" % content
+                print("邮件内容：%s" % content)
             elif str(echo).lower() == "vvv":
-                print "邮件内容：%s" % msg.as_string()
+                print("邮件内容：%s" % msg.as_string())

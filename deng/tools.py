@@ -50,7 +50,7 @@ class Tools(object):
                 res = list(res)
             try:
                 print(json.dumps(res, ensure_ascii=False, indent=4))
-                print(u"长度：", len(res))
+                print("长度：", len(res))
             except ValueError as e:
                 print(res)
                 print(e)
@@ -80,7 +80,7 @@ class Tools(object):
             else:
                 obj.sort() 
         elif isinstance(obj, dict):
-            sorted(iter(obj.items()), key=lambda asd: asd[1], reverse=reverse)
+            sorted(iter(list(obj.items())), key=lambda asd: asd[1], reverse=reverse)
         elif isinstance(obj, str):
             obj = "".join((lambda x: (x.sort(), x)[1])(list(obj)))
             if reverse:
@@ -154,7 +154,7 @@ class Tools(object):
         参数：params列表或元组，为可选，如果给出，则输入的数字必须在params内。
         """
         while True:
-            num_str = input("请输入一个有效数字：")
+            num_str = eval(input("请输入一个有效数字："))
             if num_str.isdigit():
                 num_int = int(num_str)
                 if isinstance(params, (tuple, list)) and len(params) > 0:
@@ -215,7 +215,7 @@ class Tools(object):
         Supports IPv4 and IPv6.
         """
         # IP地址必须是字符串
-        if not isinstance(ip, (str, unicode)):
+        if not isinstance(ip, str):
             return False
 
         if not ip or '\x00' in ip:
@@ -236,7 +236,7 @@ class Tools(object):
     @staticmethod
     def to_dict(body_str):
         """将x-www-form-urlencoded格式字符串转换成dict"""
-        from urllib import unquote
+        from urllib.parse import unquote
         body_str = unquote(body_str)
         items = body_str.split('&')
         payload = {}
