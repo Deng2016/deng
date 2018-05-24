@@ -237,6 +237,8 @@ class Tools(object):
     def to_dict(body_str):
         """将x-www-form-urlencoded格式字符串转换成dict"""
         from urllib.parse import unquote
+        if isinstance(body_str, bytes):
+            body_str = str(body_str)
         body_str = unquote(body_str)
         items = body_str.split('&')
         payload = {}

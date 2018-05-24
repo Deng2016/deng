@@ -6,17 +6,17 @@
 时间：2018/2/26 22:34
 """
 try:
-    import MySQLdb
+    import pymysql
 except ImportError as e:
-    print(e.message)
+    print(e)
     import os
-    os.system('pip install mysql-python')
-    import MySQLdb
+    os.system('pip install pymysql')
+    import pymysql
 
 try:
     from DBUtils.PooledDB import PooledDB
 except ImportError as e:
-    print(e.message)
+    print(e)
     import os
     os.system('pip install DBUtils')
     from DBUtils.PooledDB import PooledDB
@@ -25,7 +25,7 @@ except ImportError as e:
 class MysqlPool(object):
     """mysql连接池"""
     def __init__(self, username, password, db_name, db_host, db_port, maxconnections=100):
-        self.pool = PooledDB(MySQLdb,
+        self.pool = PooledDB(pymysql,
                              mincached=5,
                              maxcached=20,
                              maxconnections=maxconnections,

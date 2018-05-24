@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="deng",
-    version="0.1",
+    version="0.1.1",
     # summary="个人常用方法封装",
     author="dengqingyong",
     author_email="yu12377@163.com",
