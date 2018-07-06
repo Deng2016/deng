@@ -7,4 +7,5 @@
 *.zip
 *.txt
 build
+sample/
 deng.egg-info
