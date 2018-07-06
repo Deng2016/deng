@@ -32,6 +32,7 @@ class Tools(object):
         if isinstance(res, Response):
             print("================请求体信息================")
             print("请求URL：{}".format(res.request.url))
+            print("请求类型：{}".format(res.request.method))
             print("请求头：\n")
             Tools.format_print(res.request.headers)
             print("请求体：\n")
