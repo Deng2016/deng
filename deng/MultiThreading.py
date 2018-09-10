@@ -75,7 +75,7 @@ class MyThread(threading.Thread):
         threading.Thread.__init__(self, kwargs=kwargs)
         # 线程从工作队列中取任务超时时间
         self.timeout = timeout 
-        self.setDaemon(True) 
+        self.daemon = True
         self.work_queue = work_queue 
         self.result_queue = result_queue 
         self.start()
@@ -91,11 +91,11 @@ class MyThread(threading.Thread):
                 self.result_queue.put((self.getName(), int(time()), res))
             except queue.Empty:
                 break
-            except ConnectionError:
-                print("连接被拒绝，重试……")
-            except Exception as e:
-                print(sys.exc_info())
-                print(e)
+            # except ConnectionError:
+            #     print("连接被拒绝，重试……")
+            # except Exception as e:
+            #     print(sys.exc_info())
+            #     print(e)
 
 
 class ThreadPool(object):
@@ -103,6 +103,9 @@ class ThreadPool(object):
         self.work_queue = queue.Queue() 
         self.result_queue = queue.Queue() 
         self.threads = []
+        self.request_count = 0
+        self.starttime = 0
+        self.endtime = 0
         
     def create_threadpool(self, num_of_threads, timeout):
         """
@@ -121,12 +124,12 @@ class ThreadPool(object):
         print("=========================")
         print("总计请求数：", request_count)
         print("starttime:", starttime)
-        print("endtime  :", endtime) 
+        print("endtime  :", endtime)
         print("运行总耗时：", endtime - starttime)
         print("成功处理了", self.result_queue.qsize(), "次请求！")
         print("=========================")
-        return self.result_queue 
-      
+        return self.result_queue
+
     def _wait_for_complete(self):
         """
         @note:等待所有线程完成
@@ -137,7 +140,38 @@ class ThreadPool(object):
             if thread.isAlive():
                 # 判断线程是否存在来决定是否调用join
                 thread.join()
-     
+
+    def create_threadpool_nowait(self, num_of_threads, timeout):
+        """
+        @note:创建线程池
+        """
+        self.starttime = int(time())
+        print("本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
+                                                timeout))
+        for i in range(num_of_threads):
+            thread = MyThread(self.work_queue, self.result_queue, timeout)
+            self.threads.append(thread)
+
+    def wait_for_complete(self):
+        """
+        @note:等待所有线程完成
+        """
+        while len(self.threads):
+            thread = self.threads.pop()
+            # 等待线程结束
+            if thread.isAlive():
+                # 判断线程是否存在来决定是否调用join
+                thread.join()
+        self.request_count = self.result_queue.qsize()
+        self.endtime = int(time())
+        print("=========================")
+        print("总计请求数：", self.request_count)
+        print("starttime:", self.starttime)
+        print("endtime  :", self.endtime)
+        print("运行总耗时：", self.endtime - self.starttime)
+        print("成功处理了", self.request_count, "次请求！")
+        print("=========================")
+
     def add_job(self, func, *args, **kwargs):
         """
         @note:往工作队列中添加任务

@@ -1,29 +1,37 @@
-#-*- coding:utf-8 -*-
+#!/usr/bin/env python
+# coding:utf-8
+"""md5加密函数，可加密字符串与文件
+"""
 import sys
-import imp
-imp.reload( sys )
-sys.setdefaultencoding('utf-8')
 import json
+import hashlib
 from urllib.parse import urlencode
 import requests
 
-class encrypt(object):
-    # 计算MD5值
-    def getmd5(self, paramStr):
+
+class EncryptTools(object):
+    """加密类，目前仅支持md5加密"""
+
+    @staticmethod
+    def getmd5(paramstr):
+        """计算MD5值"""
+        if isinstance(paramstr, int):
+            paramstr = str(paramstr)
         try:
-            import hashlib
-            hash = hashlib.md5()
+            _hash = hashlib.md5()
+            _hash.update(paramstr.encode('UTF-8'))
         except ImportError:
             # for Python << 2.5
             import md5
-            hash = md5.new()
-        hash.update(paramStr)
-        return  hash.hexdigest()
+            _hash = md5.new()
+            _hash.update(paramstr)
+        return _hash.hexdigest()
 
-    # 参数升序排序及拼接
-    def join_array(self,param):
-        str_data='' 
-        sorted_x = sorted(iter(param.items()), key=lambda param : param[0])
-        for tuple in sorted_x:
-            str_data+=str(tuple[0])+str(tuple[1])
+    @staticmethod
+    def join_array(param_dict):
+        """将字典参数按升序排序并及拼接成字符串"""
+        str_data = ''
+        sorted_x = sorted(iter(param_dict.items()), key=lambda param_dict : param_dict[0])
+        for mytuple in sorted_x:
+            str_data += str(mytuple[0])+str(mytuple[1])
         return str_data
