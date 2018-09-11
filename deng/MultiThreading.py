@@ -71,13 +71,14 @@ class MultiThreading(object):
 
 
 class MyThread(threading.Thread):
-    def __init__(self, work_queue, result_queue, timeout, **kwargs):
+    def __init__(self, work_queue, result_queue, timeout, save_resule=True, **kwargs):
         threading.Thread.__init__(self, kwargs=kwargs)
         # 线程从工作队列中取任务超时时间
         self.timeout = timeout 
         self.daemon = True
         self.work_queue = work_queue 
-        self.result_queue = result_queue 
+        self.result_queue = result_queue
+        self.save_resule = save_resule
         self.start()
         
     def run(self):
@@ -86,7 +87,14 @@ class MyThread(threading.Thread):
                 # 从工作队列中获取任务
                 func, args, kwargs = self.work_queue.get(timeout=self.timeout)
                 # 执行任务
-                res = func(*args, **kwargs)
+                # 执行结果变量
+                res = 1
+                if self.save_resule:
+                    # 保存执行结果
+                    res = func(*args, **kwargs)
+                else:
+                    # 不保执行存结果
+                    func(*args, **kwargs)
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), int(time()), res))
             except queue.Empty:
@@ -107,16 +115,17 @@ class ThreadPool(object):
         self.starttime = 0
         self.endtime = 0
         
-    def create_threadpool(self, num_of_threads, timeout):
+    def create_threadpool(self, num_of_threads, timeout, save_resule):
         """
         @note:创建线程池
         """
-        print("本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
-                                                timeout))
+        print("本次启动【{}】个线程，"
+              "线程超时时间为【{}】秒，"
+              "保存每次执行结果：【{}】".format(num_of_threads, timeout, save_resule))
         request_count = self.work_queue.qsize()
         starttime = int(time()) 
         for i in range(num_of_threads):
-            thread = MyThread(self.work_queue, self.result_queue, timeout)
+            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule)
             self.threads.append(thread)
         # 设置等待所有子线程完成
         self._wait_for_complete()
@@ -141,15 +150,16 @@ class ThreadPool(object):
                 # 判断线程是否存在来决定是否调用join
                 thread.join()
 
-    def create_threadpool_nowait(self, num_of_threads, timeout):
+    def create_threadpool_nowait(self, num_of_threads, timeout, save_resule):
         """
         @note:创建线程池
         """
         self.starttime = int(time())
-        print("本次启动【{}】个线程，线程超时时间为【{}】秒".format(num_of_threads,
-                                                timeout))
+        print("本次启动【{}】个线程，"
+              "线程超时时间为【{}】秒，"
+              "保存每次执行结果：【{}】".format(num_of_threads, timeout, save_resule))
         for i in range(num_of_threads):
-            thread = MyThread(self.work_queue, self.result_queue, timeout)
+            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule)
             self.threads.append(thread)
 
     def wait_for_complete(self):
