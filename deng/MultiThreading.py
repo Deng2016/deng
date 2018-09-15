@@ -71,8 +71,8 @@ class MultiThreading(object):
 
 
 class MyThread(threading.Thread):
-    def __init__(self, work_queue, result_queue, timeout, save_resule=True, **kwargs):
-        threading.Thread.__init__(self, kwargs=kwargs)
+    def __init__(self, work_queue, result_queue, timeout, save_resule=True, *args, **kwargs):
+        threading.Thread.__init__(self, *args, kwargs=kwargs)
         # 线程从工作队列中取任务超时时间
         self.timeout = timeout 
         self.daemon = True
@@ -89,21 +89,20 @@ class MyThread(threading.Thread):
                 # 执行任务
                 # 执行结果变量
                 res = 1
+                # 启动时间
+                starttime = int(time())
                 if self.save_resule:
                     # 保存执行结果
                     res = func(*args, **kwargs)
                 else:
                     # 不保执行存结果
                     func(*args, **kwargs)
+                # 执行结束时间
+                endtime = int(time())
                 # 把任务执行结果放入结果队列中
-                self.result_queue.put((self.getName(), int(time()), res))
+                self.result_queue.put((self.getName(), endtime - starttime, res))
             except queue.Empty:
                 break
-            # except ConnectionError:
-            #     print("连接被拒绝，重试……")
-            # except Exception as e:
-            #     print(sys.exc_info())
-            #     print(e)
 
 
 class ThreadPool(object):
