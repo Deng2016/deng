@@ -186,13 +186,18 @@ class TestData(object):
     @staticmethod
     def get_phone_on():
         """生成随机手机号码"""
+        return TestData.get_phone_no()
+
+    @staticmethod
+    def get_phone_no():
+        """生成随机手机号码"""
         phone_head = [130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
                       150, 151, 152, 155, 158,
                       170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
                       181, 186, 187, 188, 189]
-        phone_on = str(random.choice(phone_head)) + "".join(
+        phone_no = str(random.choice(phone_head)) + "".join(
             random.choice("0123456789") for i in range(8))
-        return phone_on
+        return phone_no
 
     @staticmethod
     def get_phone_serial_no():

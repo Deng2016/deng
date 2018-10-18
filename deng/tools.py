@@ -12,6 +12,7 @@ import socket
 import random
 import string
 import tarfile
+from datetime import datetime
 from dateutil.parser import parser
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
@@ -33,18 +34,27 @@ class Tools(object):
             print("================请求体信息================")
             print("请求URL：{}".format(res.request.url))
             print("请求类型：{}".format(res.request.method))
-            print("请求头：\n")
+            print("请求头：")
             Tools.format_print(res.request.headers)
-            print("请求体：\n")
+            print("请求体原始串：")
             Tools.format_print(res.request.body)
+            if res.request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
+                print("请求体格式化后：")
+                Tools.format_print(Tools.to_dict(res.request.body))
             print("================响应体信息================")
             print("返回码：{} URL: {}".format(res.status_code, res.url))
-            print("响应头：\n")
+            print("响应头：")
             Tools.format_print(res.headers)
-            print("响应体：\n")
+            print("响应体：")
             try:
-                print(json.dumps(res.json(), ensure_ascii=False, indent=4))
-            except ValueError as e:
+                if "text/json" in res.headers.get('Content-Type'):
+                    print(json.dumps(res.json(), ensure_ascii=False, indent=4))
+                elif "text/javascript" in res.headers.get('Content-Type'):
+                    _temp = res.text[9:-1]
+                    Tools.format_print(json.loads(_temp))
+                else:
+                    print(res.text)
+            except Exception as e:
                 print(res.text)
         elif isinstance(res, (tuple, list, dict, set)):
             if isinstance(res, set):
@@ -91,8 +101,20 @@ class Tools(object):
         return obj 
     
     @staticmethod
-    def time_format(ftime):
-        return ftime.strftime('%Y-%m-%d %H:%M:%S')
+    def time_format(ftime, format="long"):
+        if format == "long":
+            return ftime.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            return ftime.strftime('%Y-%m-%d')
+
+    @staticmethod
+    def str_to_time(tstr, format="long"):
+        if tstr is None:
+            return None
+        if format == "long":
+            return datetime.strptime(tstr, '%Y-%m-%d %H:%M:%S')
+        else:
+            return datetime.strptime(tstr, '%Y-%m-%d')
 
     @staticmethod
     def get_timestamp(length=10, offset=0):
@@ -112,11 +134,6 @@ class Tools(object):
             return time.strftime("%Y-%m-%d", time.localtime(time.time() - offset))
         else:
             return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - offset))
-
-    @staticmethod
-    def str_to_time(str_time):
-        datetime_struct = parser(str_time)
-        return datetime_struct
 
     @staticmethod
     def utc_to_bjtime(utctime):
