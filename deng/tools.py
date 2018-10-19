@@ -111,10 +111,13 @@ class Tools(object):
     def str_to_time(tstr, format="long"):
         if tstr is None:
             return None
-        if format == "long":
-            return datetime.strptime(tstr, '%Y-%m-%d %H:%M:%S')
-        else:
-            return datetime.strptime(tstr, '%Y-%m-%d')
+        try:
+            if format == "long":
+                    return datetime.strptime(tstr, '%Y-%m-%d %H:%M:%S')
+            else:
+                return datetime.strptime(tstr, '%Y-%m-%d')
+        except Exception as e:
+            return None
 
     @staticmethod
     def get_timestamp(length=10, offset=0):
