@@ -5,6 +5,7 @@ Created on 2016年1月28日
 @author: dengqingyong
 @email: yu12377@163.com
 """
+import re
 import os
 import json 
 import time
@@ -53,9 +54,9 @@ class Tools(object):
                     _temp = res.text[9:-1]
                     Tools.format_print(json.loads(_temp))
                 else:
-                    print(res.text)
+                    print(Tools.clean_img(res))
             except Exception as e:
-                print(res.text)
+                print(Tools.clean_img(res))
         elif isinstance(res, (tuple, list, dict, set)):
             if isinstance(res, set):
                 res = list(res)
@@ -267,3 +268,15 @@ class Tools(object):
             key, values = item.split('=')
             payload[key] = values
         return payload
+
+    @staticmethod
+    def clean_img(res):
+        """html源码页面中清除图片元素"""
+        if isinstance(res, Response):
+            res = res.text
+        elif isinstance(res, str):
+            pass
+        else:
+            return res
+        pattern = r'<img.*>'
+        return re.sub(pattern, '<img src="请注意，图片已经被踢除......">', res, re.I)
