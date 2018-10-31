@@ -16,6 +16,7 @@ import tarfile
 from datetime import datetime
 from dateutil.parser import parser
 from requests.models import Response
+from requests_html import HTMLResponse
 from requests.structures import CaseInsensitiveDict
 from xml.etree.ElementTree import Element, tostring
 
@@ -274,9 +275,21 @@ class Tools(object):
         """html源码页面中清除图片元素"""
         if isinstance(res, Response):
             res = res.text
+        elif isinstance(res, HTMLResponse):
+            res = res.html.text
         elif isinstance(res, str):
             pass
         else:
             return res
         pattern = r'<img.*>'
         return re.sub(pattern, '<img src="请注意，图片已经被踢除......">', res, re.I)
+
+    @staticmethod
+    def to_boolean(flag, default=False):
+        """将字符串或数字转换成布尔型"""
+        if flag is None or len(str(flag)) == 0:
+            return default
+        elif str(flag).lower() in ('false', '0'):
+            return False
+        else:
+            return True
