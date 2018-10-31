@@ -117,7 +117,8 @@ class Tools(object):
             if format == "long":
                     return datetime.strptime(tstr, '%Y-%m-%d %H:%M:%S')
             else:
-                return datetime.strptime(tstr, '%Y-%m-%d')
+                day = datetime.strptime(tstr, '%Y-%m-%d')
+                return day.date()
         except Exception as e:
             return None
 
