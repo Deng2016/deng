@@ -102,6 +102,7 @@ class MyThread(threading.Thread):
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), endtime - starttime, res))
             except queue.Empty:
+                print('线程【{}】从queue队列中获取任务超时，退出！'.format(self.ident))
                 break
 
 
