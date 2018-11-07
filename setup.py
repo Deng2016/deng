@@ -15,6 +15,7 @@ setup(
     install_requires=[
         "requests>=2.18.2",
         "python-dateutil>=1.5",
+        "requests-html>=0.9.0",
         # 改为使用时动态导入
         # "MySQL-python>=1.2.5",
         # "DBUtils>=1.2"
