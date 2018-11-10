@@ -71,7 +71,7 @@ class MultiThreading(object):
 
 
 class MyThread(threading.Thread):
-    def __init__(self, work_queue, result_queue, timeout, save_resule=True, *args, **kwargs):
+    def __init__(self, work_queue, result_queue, timeout, save_resule=True, logger=None, *args, **kwargs):
         threading.Thread.__init__(self, *args, kwargs=kwargs)
         # 线程从工作队列中取任务超时时间
         self.timeout = timeout 
@@ -79,6 +79,7 @@ class MyThread(threading.Thread):
         self.work_queue = work_queue 
         self.result_queue = result_queue
         self.save_resule = save_resule
+        self.logger = logger
         self.start()
         
     def run(self):
@@ -101,42 +102,60 @@ class MyThread(threading.Thread):
                 endtime = int(time())
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), endtime - starttime, res))
+                if self.logger:
+                    self.logger.debug('已经处理了【{}】请求……'.format(self.result_queue.qsize()))
             except queue.Empty:
-                print('线程【{}】任务已完成（从queue队列中获取任务超时【{}秒】），退出！'.format(self.ident, self.timeout))
+                if self.logger:
+                    self.logger.info('线程【{}】任务已完成（从queue队列中获取任务超时【{}秒】），退出！'.format(self.ident, self.timeout))
+                else:
+                    print('线程【{}】任务已完成（从queue队列中获取任务超时【{}秒】），退出！'.format(self.ident, self.timeout))
                 break
+            except Exception as e:
+                if self.logger:
+                    self.logger.exception(e)
+                    self.logger.error('程序运营出错，参数args={}，参数kwargs={}'.format(str(args), str(kwargs)))
+                else:
+                    print('程序运营出错，参数args={}，参数kwargs={}'.format(str(args), str(kwargs)))
 
 
 class ThreadPool(object):
-    def __init__(self):
+    def __init__(self, logger=None):
         self.work_queue = queue.Queue() 
         self.result_queue = queue.Queue() 
         self.threads = []
         self.request_count = 0
         self.starttime = 0
         self.endtime = 0
+        self.logger = logger
         
     def create_threadpool(self, num_of_threads, timeout, save_resule):
         """
         @note:创建线程池
         """
-        print("本次启动【{}】个线程，"
-              "线程超时时间为【{}】秒，"
-              "保存每次执行结果：【{}】".format(num_of_threads, timeout, save_resule))
+        _msg = "\n\n本次启动【{}】个线程，线程超时时间为【{}】秒，保存每次执行结果：【{}】\n".format(num_of_threads, timeout, save_resule)
+        if self.logger:
+            self.logger.info(_msg)
+        else:
+            print(_msg)
         request_count = self.work_queue.qsize()
-        starttime = int(time()) 
+        starttime = int(time())
         for i in range(num_of_threads):
-            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule)
+            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule, logger=self.logger)
             self.threads.append(thread)
         # 设置等待所有子线程完成
         self._wait_for_complete()
         endtime = int(time())
-        print("=========================")
-        print("总计请求数：", request_count)
-        print("starttime:", starttime)
-        print("endtime  :", endtime)
-        print("运行总耗时：", endtime - starttime)
-        print("成功处理了", self.result_queue.qsize(), "次请求！")
-        print("=========================")
+        _msg = "\n========================="
+        _msg += "\n总计请求数：{}".format(request_count)
+        _msg += "\nstarttime：{}".format(starttime)
+        _msg += "\nendtime  ：{}".format(endtime)
+        _msg += "\n运行总耗时：{}".format(endtime - starttime)
+        _msg += "\n成功处理了{}次请求！".format(self.result_queue.qsize())
+        _msg += "\n========================="
+        if self.logger:
+            self.logger.info(_msg)
+        else:
+            print(_msg)
         return self.result_queue
 
     def _wait_for_complete(self):
@@ -154,12 +173,14 @@ class ThreadPool(object):
         """
         @note:创建线程池
         """
+        _msg = "\n\n本次启动【{}】个线程，线程超时时间为【{}】秒，保存每次执行结果：【{}】\n".format(num_of_threads, timeout, save_resule)
+        if self.logger:
+            self.logger.info(_msg)
+        else:
+            print(_msg)
         self.starttime = int(time())
-        print("本次启动【{}】个线程，"
-              "线程超时时间为【{}】秒，"
-              "保存每次执行结果：【{}】".format(num_of_threads, timeout, save_resule))
         for i in range(num_of_threads):
-            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule)
+            thread = MyThread(self.work_queue, self.result_queue, timeout, save_resule, logger=self.logger)
             self.threads.append(thread)
 
     def wait_for_complete(self):
@@ -174,13 +195,16 @@ class ThreadPool(object):
                 thread.join()
         self.request_count = self.result_queue.qsize()
         self.endtime = int(time())
-        print("=========================")
-        print("总计请求数：", self.request_count)
-        print("starttime:", self.starttime)
-        print("endtime  :", self.endtime)
-        print("运行总耗时：", self.endtime - self.starttime)
-        print("成功处理了", self.request_count, "次请求！")
-        print("=========================")
+        _msg = "\n========================="
+        _msg += "\nstarttime：{}".format(self.starttime)
+        _msg += "\nendtime  ：{}".format(self.endtime)
+        _msg += "\n运行总耗时：{}".format(self.endtime - self.starttime)
+        _msg += "\n总计成功处理了{}次请求！".format(self.result_queue.qsize())
+        _msg += "\n========================="
+        if self.logger:
+            self.logger.info(_msg)
+        else:
+            print(_msg)
 
     def add_job(self, func, *args, **kwargs):
         """
