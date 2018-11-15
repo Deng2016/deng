@@ -5,6 +5,51 @@ import queue
 import threading
 from time import time
 from requests import ConnectionError
+import os
+import sys
+import logging.handlers
+
+
+__all__ = ['ThreadPool', 'MultiThreading']
+
+
+def get_logger():
+    """生成日志文件句柄"""
+    # 日志文件名称
+    logpath = os.getcwd()
+    server_log = os.path.join(logpath, "ThreadPool.log")
+    error_log = os.path.join(logpath, "ThreadPoolError.log")
+
+    # 定义handler
+    log_handler = logging.handlers.TimedRotatingFileHandler(
+        server_log, when="D", backupCount=10, encoding="utf-8"
+    )
+    err_handler = logging.handlers.TimedRotatingFileHandler(
+        error_log, when="D", backupCount=10, encoding="utf-8"
+    )
+    console = logging.StreamHandler(sys.stdout)
+
+    # 定义日志显示格式
+    fmt = "%(asctime)s - %(thread)d - %(name)s - %(funcName)s - %(lineno)s - %(levelname)s - %(message)s"
+    formatter = logging.Formatter(fmt)
+
+    # 设置handler日志格式
+    log_handler.setFormatter(formatter)
+    err_handler.setFormatter(formatter)
+    console.setFormatter(formatter)
+
+    # 设置handler日志级别
+    log_handler.setLevel(logging.DEBUG)
+    err_handler.setLevel(logging.ERROR)
+    console.setLevel(logging.INFO)
+
+    # 定义日志hander
+    logger = logging.getLogger(__name__)
+    logger.addHandler(console)
+    logger.addHandler(log_handler)
+    logger.addHandler(err_handler)
+    logger.warning('线程池日志文件路径：{}，{}'.format(server_log, error_log))
+    return logger
 
 
 class MultiThreading(object):
@@ -73,8 +118,11 @@ class MultiThreading(object):
 class MyThread(threading.Thread):
     def __init__(self, work_queue, result_queue, timeout, save_resule=True, logger=None, *args, **kwargs):
         threading.Thread.__init__(self, *args, kwargs=kwargs)
+        self.starttime = int(time())
+        self.endtime = None
+        self.run_count = 0
         # 线程从工作队列中取任务超时时间
-        self.timeout = timeout 
+        self.timeout = int(timeout)
         self.daemon = True
         self.work_queue = work_queue 
         self.result_queue = result_queue
@@ -100,33 +148,39 @@ class MyThread(threading.Thread):
                     func(*args, **kwargs)
                 # 执行结束时间
                 endtime = int(time())
+                self.run_count += 1
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), endtime - starttime, res))
                 if self.logger:
                     self.logger.debug('已经处理了【{}】请求……'.format(self.result_queue.qsize()))
+                else:
+                    print('已经处理了【{}】请求……'.format(self.result_queue.qsize()))
             except queue.Empty:
+                self.endtime = int(time()) - self.timeout
                 if self.logger:
-                    self.logger.info('线程【{}】任务已完成（从queue队列中获取任务超时【{}秒】），退出！'.format(self.ident, self.timeout))
+                    self.logger.info('线程【{}-{}】任务已完成，运行【{}秒】，完成请求：【{}次】'.format(self.getName(), self.ident, self.endtime - self.starttime, self.run_count))
                 else:
-                    print('线程【{}】任务已完成（从queue队列中获取任务超时【{}秒】），退出！'.format(self.ident, self.timeout))
+                    print('线程【{}-{}】任务已完成，运行【{}秒】，完成请求：【{}次】'.format(self.getName(), self.ident, self.endtime - self.starttime, self.run_count))
                 break
-            except Exception as e:
-                if self.logger:
-                    self.logger.exception(e)
-                    self.logger.error('程序运营出错，参数args={}，参数kwargs={}'.format(str(args), str(kwargs)))
-                else:
-                    print('程序运营出错，参数args={}，参数kwargs={}'.format(str(args), str(kwargs)))
 
 
 class ThreadPool(object):
-    def __init__(self, logger=None):
+    def __init__(self, loglevel=None):
         self.work_queue = queue.Queue() 
         self.result_queue = queue.Queue() 
         self.threads = []
         self.request_count = 0
         self.starttime = 0
         self.endtime = 0
-        self.logger = logger
+        if loglevel is None:
+            loglevel = ''
+        if loglevel.lower() not in ('', 'print', 'debug', 'info', 'warning', 'error'):
+            loglevel = ''
+        if loglevel == 'print' or loglevel == '':
+            self.logger = None
+        else:
+            self.logger = get_logger()
+            self.logger.setLevel(getattr(logging, loglevel.upper()))
         
     def create_threadpool(self, num_of_threads, timeout, save_resule):
         """
