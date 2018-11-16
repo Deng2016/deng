@@ -152,7 +152,7 @@ class MyThread(threading.Thread):
                 # 把任务执行结果放入结果队列中
                 self.result_queue.put((self.getName(), endtime - starttime, res))
                 if self.logger:
-                    self.logger.debug('已经处理了【{}】请求……'.format(self.result_queue.qsize()))
+                    self.logger.debug('已经处理了【{}】请求，还剩余【{}】待处理……'.format(self.result_queue.qsize(), self.work_queue.qsize()))
                 else:
                     print('已经处理了【{}】请求……'.format(self.result_queue.qsize()))
             except queue.Empty:
