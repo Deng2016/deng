@@ -11,10 +11,16 @@ import logging.handlers
 
 
 __all__ = ['ThreadPool', 'MultiThreading']
+# 日志句柄，只实例化一次
+LOGGER = None
 
 
 def get_logger():
     """生成日志文件句柄"""
+    # 一实例化一次，已经存在时直接返回
+    global LOGGER
+    if LOGGER:
+        return LOGGER
     # 日志文件名称
     logpath = os.getcwd()
     server_log = os.path.join(logpath, "ThreadPool.log")
@@ -49,7 +55,8 @@ def get_logger():
     logger.addHandler(log_handler)
     logger.addHandler(err_handler)
     logger.warning('线程池日志文件路径：{}，{}'.format(server_log, error_log))
-    return logger
+    LOGGER = logger
+    return LOGGER
 
 
 class MultiThreading(object):
