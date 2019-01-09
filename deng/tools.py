@@ -267,7 +267,12 @@ class Tools(object):
         items = body_str.split('&')
         payload = {}
         for item in items:
-            key, values = item.split('=')
+            try:
+                key, values = item.split('=')
+            except ValueError as e:
+                print('警告：拆包时出来异常，可能是字符串中存在多个【=】导致，启用备用方案拆包：忽略第2个及以后的【=】字符')
+                print('原始字符串：{}'.format(item))
+                key, values = item.split('=', 1)
             payload[key] = values
         return payload
 
