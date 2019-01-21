@@ -4,7 +4,6 @@ import sys
 import queue 
 import threading
 from time import time
-from requests import ConnectionError
 import os
 import sys
 import logging.handlers
@@ -15,46 +14,52 @@ __all__ = ['ThreadPool', 'MultiThreading']
 LOGGER = None
 
 
-def get_logger():
+def get_logger(savelog=False):
     """生成日志文件句柄"""
     # 一实例化一次，已经存在时直接返回
     global LOGGER
     if LOGGER:
         return LOGGER
-    # 日志文件名称
-    logpath = os.getcwd()
-    server_log = os.path.join(logpath, "ThreadPool.log")
-    error_log = os.path.join(logpath, "ThreadPoolError.log")
 
-    # 定义handler
-    log_handler = logging.handlers.TimedRotatingFileHandler(
-        server_log, when="D", backupCount=10, encoding="utf-8"
-    )
-    err_handler = logging.handlers.TimedRotatingFileHandler(
-        error_log, when="D", backupCount=10, encoding="utf-8"
-    )
-    console = logging.StreamHandler(sys.stdout)
+    # 定义日志hander
+    logger = logging.getLogger(__name__)
 
     # 定义日志显示格式
     fmt = "%(asctime)s - %(thread)d - %(name)s - %(funcName)s - %(lineno)s - %(levelname)s - %(message)s"
     formatter = logging.Formatter(fmt)
 
-    # 设置handler日志格式
-    log_handler.setFormatter(formatter)
-    err_handler.setFormatter(formatter)
+    # 定义console采集器
+    console = logging.StreamHandler(sys.stdout)
     console.setFormatter(formatter)
-
-    # 设置handler日志级别
-    log_handler.setLevel(logging.DEBUG)
-    err_handler.setLevel(logging.ERROR)
     console.setLevel(logging.INFO)
-
-    # 定义日志hander
-    logger = logging.getLogger(__name__)
     logger.addHandler(console)
-    logger.addHandler(log_handler)
-    logger.addHandler(err_handler)
-    logger.warning('线程池日志文件路径：{}，{}'.format(server_log, error_log))
+
+    # 定义文件采集器
+    if savelog:
+        logpath = os.getcwd()
+        server_log = os.path.join(logpath, "ThreadPool.log")
+        error_log = os.path.join(logpath, "ThreadPoolError.log")
+
+        # 定义handler
+        log_handler = logging.handlers.TimedRotatingFileHandler(
+            server_log, when="D", backupCount=10, encoding="utf-8"
+        )
+        err_handler = logging.handlers.TimedRotatingFileHandler(
+            error_log, when="D", backupCount=10, encoding="utf-8"
+        )
+
+        # 设置handler日志格式
+        log_handler.setFormatter(formatter)
+        err_handler.setFormatter(formatter)
+
+        # 设置handler日志级别
+        log_handler.setLevel(logging.DEBUG)
+        err_handler.setLevel(logging.ERROR)
+
+        logger.addHandler(log_handler)
+        logger.addHandler(err_handler)
+        logger.warning('线程池日志文件路径：{}，{}'.format(server_log, error_log))
+
     LOGGER = logger
     return LOGGER
 
@@ -172,7 +177,7 @@ class MyThread(threading.Thread):
 
 
 class ThreadPool(object):
-    def __init__(self, loglevel=None):
+    def __init__(self, loglevel=None, savelog=False):
         self.work_queue = queue.Queue() 
         self.result_queue = queue.Queue() 
         self.threads = []
@@ -186,7 +191,7 @@ class ThreadPool(object):
         if loglevel == 'print' or loglevel == '':
             self.logger = None
         else:
-            self.logger = get_logger()
+            self.logger = get_logger(savelog=savelog)
             self.logger.setLevel(getattr(logging, loglevel.upper()))
         
     def create_threadpool(self, num_of_threads, timeout, save_resule):
