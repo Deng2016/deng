@@ -5,6 +5,7 @@ Created on 2016年1月28日
 @author: dengqingyong
 @email: yu12377@163.com
 """
+import re
 import os
 import json 
 import time
@@ -12,8 +13,10 @@ import socket
 import random
 import string
 import tarfile
+from datetime import datetime
 from dateutil.parser import parser
 from requests.models import Response
+from requests_html import HTMLResponse
 from requests.structures import CaseInsensitiveDict
 from xml.etree.ElementTree import Element, tostring
 
@@ -32,25 +35,35 @@ class Tools(object):
         if isinstance(res, Response):
             print("================请求体信息================")
             print("请求URL：{}".format(res.request.url))
-            print("请求头：\n")
+            print("请求类型：{}".format(res.request.method))
+            print("请求头：")
             Tools.format_print(res.request.headers)
-            print("请求体：\n")
+            print("请求体原始串：")
             Tools.format_print(res.request.body)
+            if res.request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
+                print("请求体格式化后：")
+                Tools.format_print(Tools.to_dict(res.request.body))
             print("================响应体信息================")
             print("返回码：{} URL: {}".format(res.status_code, res.url))
-            print("响应头：\n")
+            print("响应头：")
             Tools.format_print(res.headers)
-            print("响应体：\n")
+            print("响应体：")
             try:
-                print(json.dumps(res.json(), ensure_ascii=False, indent=4))
-            except ValueError as e:
-                print(res.text)
+                if "text/json" in res.headers.get('Content-Type'):
+                    print(json.dumps(res.json(), ensure_ascii=False, indent=4))
+                elif "text/javascript" in res.headers.get('Content-Type'):
+                    _temp = res.text[9:-1]
+                    Tools.format_print(json.loads(_temp))
+                else:
+                    print(Tools.clean_img(res))
+            except Exception as e:
+                print(Tools.clean_img(res))
         elif isinstance(res, (tuple, list, dict, set)):
             if isinstance(res, set):
                 res = list(res)
             try:
                 print(json.dumps(res, ensure_ascii=False, indent=4))
-                print(u"长度：", len(res))
+                print("长度：", len(res))
             except ValueError as e:
                 print(res)
                 print(e)
@@ -80,7 +93,7 @@ class Tools(object):
             else:
                 obj.sort() 
         elif isinstance(obj, dict):
-            sorted(iter(obj.items()), key=lambda asd: asd[1], reverse=reverse)
+            sorted(iter(list(obj.items())), key=lambda asd: asd[1], reverse=reverse)
         elif isinstance(obj, str):
             obj = "".join((lambda x: (x.sort(), x)[1])(list(obj)))
             if reverse:
@@ -90,8 +103,24 @@ class Tools(object):
         return obj 
     
     @staticmethod
-    def time_format(ftime):
-        return ftime.strftime('%Y-%m-%d %H:%M:%S')
+    def time_format(ftime, format="long"):
+        if format == "long":
+            return ftime.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            return ftime.strftime('%Y-%m-%d')
+
+    @staticmethod
+    def str_to_time(tstr, format="long"):
+        if tstr is None:
+            return None
+        try:
+            if format == "long":
+                    return datetime.strptime(tstr, '%Y-%m-%d %H:%M:%S')
+            else:
+                day = datetime.strptime(tstr, '%Y-%m-%d')
+                return day.date()
+        except Exception as e:
+            return None
 
     @staticmethod
     def get_timestamp(length=10, offset=0):
@@ -111,11 +140,6 @@ class Tools(object):
             return time.strftime("%Y-%m-%d", time.localtime(time.time() - offset))
         else:
             return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - offset))
-
-    @staticmethod
-    def str_to_time(str_time):
-        datetime_struct = parser(str_time)
-        return datetime_struct
 
     @staticmethod
     def utc_to_bjtime(utctime):
@@ -154,7 +178,7 @@ class Tools(object):
         参数：params列表或元组，为可选，如果给出，则输入的数字必须在params内。
         """
         while True:
-            num_str = input("请输入一个有效数字：")
+            num_str = eval(input("请输入一个有效数字："))
             if num_str.isdigit():
                 num_int = int(num_str)
                 if isinstance(params, (tuple, list)) and len(params) > 0:
@@ -215,7 +239,7 @@ class Tools(object):
         Supports IPv4 and IPv6.
         """
         # IP地址必须是字符串
-        if not isinstance(ip, (str, unicode)):
+        if not isinstance(ip, str):
             return False
 
         if not ip or '\x00' in ip:
@@ -236,11 +260,42 @@ class Tools(object):
     @staticmethod
     def to_dict(body_str):
         """将x-www-form-urlencoded格式字符串转换成dict"""
-        from urllib import unquote
+        from urllib.parse import unquote
+        if isinstance(body_str, bytes):
+            body_str = str(body_str)
         body_str = unquote(body_str)
         items = body_str.split('&')
         payload = {}
         for item in items:
-            key, values = item.split('=')
+            try:
+                key, values = item.split('=')
+            except ValueError as e:
+                print('警告：拆包时出来异常，可能是字符串中存在多个【=】导致，启用备用方案拆包：忽略第2个及以后的【=】字符')
+                print('原始字符串：{}'.format(item))
+                key, values = item.split('=', 1)
             payload[key] = values
         return payload
+
+    @staticmethod
+    def clean_img(res):
+        """html源码页面中清除图片元素"""
+        if isinstance(res, Response):
+            res = res.text
+        elif isinstance(res, HTMLResponse):
+            res = res.html.text
+        elif isinstance(res, str):
+            pass
+        else:
+            return res
+        pattern = r'<img.*>'
+        return re.sub(pattern, '<img src="请注意，图片已经被踢除......">', res, re.I)
+
+    @staticmethod
+    def to_boolean(flag, default=False):
+        """将字符串或数字转换成布尔型"""
+        if flag is None or len(str(flag)) == 0:
+            return default
+        elif str(flag).lower() in ('false', '0'):
+            return False
+        else:
+            return True

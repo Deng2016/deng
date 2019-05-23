@@ -6,8 +6,9 @@ from setuptools import setup, find_packages
 
 setup(
     name="deng",
-    version="0.1",
-    # summary="个人常用方法封装",
+    version="0.1.2",
+    summary="个人常用方法封装——最近更新：线程池添加日志输出",
+    home_page="https://github.com/Deng2016/deng",
     author="dengqingyong",
     author_email="yu12377@163.com",
     packages=find_packages(),
@@ -15,8 +16,6 @@ setup(
     install_requires=[
         "requests>=2.18.2",
         "python-dateutil>=1.5",
-        # 改为使用时动态导入
-        # "MySQL-python>=1.2.5",
-        # "DBUtils>=1.2"
+        "requests-html>=0.9.0",
         ]
 )

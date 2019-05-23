@@ -8,7 +8,7 @@
 import time
 import random
 import string
-from addressinfo import addr
+from .addressinfo import addr
 
 
 class TestData(object):
@@ -17,7 +17,7 @@ class TestData(object):
     @staticmethod
     def get_name(gender=''):
         """获取中国人惯用姓名"""
-        firstnames = u"""
+        firstnames = """
             赵钱孙李，周吴郑王。
             冯陈褚卫，蒋沈韩杨。
             朱秦尤许，何吕施张。
@@ -45,7 +45,7 @@ class TestData(object):
         firstnames = firstnames.replace('，', '').replace('。', '').replace('\n', '').replace(' ', '')
         firstname = random.choice(firstnames)
 
-        secondname_boy = u"""
+        secondname_boy = """
         澄邈、德泽、海超、海阳、海荣、海逸、海昌、瀚钰、瀚文、涵亮、涵煦、涵蓄、涵衍、浩皛、浩波、浩博、浩初、浩宕、浩歌、浩广、浩邈、浩气、
         浩思、浩言、鸿宝、鸿波、鸿博、鸿才、鸿畅、鸿畴、鸿达、鸿德、鸿飞、鸿风、鸿福、鸿光、鸿晖、鸿朗、鸿文、鸿轩、鸿煊、鸿骞、鸿远、鸿云、
         鸿哲、鸿祯、鸿志、鸿卓、嘉澍、光济、澎湃、彭泽、鹏池、鹏海、浦和、浦泽、瑞渊、越泽、博耘、德运、辰宇、辰皓、辰钊、辰铭、辰锟、辰阳、
@@ -63,7 +63,7 @@ class TestData(object):
         文景、曦哲、永昌、子昂、智宇、智晖、晗日、晗昱、瀚玥、瀚昂、昊硕、昊磊、昊东、鸿晖、绍晖、文昂、文景、曦哲、永昌、子昂、智宇、智晖、
         浩然、鸿运、辰龙、运珹、振宇、高朗、景平、鑫鹏、昌淼、炫明、昆皓、曜栋、文昂"""
 
-        secondname_grid = u"""
+        secondname_grid = """
         恨桃、依秋、依波、香巧、紫萱、涵易、忆之、幻巧、水风、安寒、白亦、惜玉、碧春、怜雪、听南、念蕾、紫夏、凌旋、芷梦、凌寒、梦竹、千凡、
         采波、元冬、思菱、平卉、笑柳、雪卉、南蓉、谷梦、巧兰、绿蝶、飞荷、平安、芷荷、怀瑶、慕易、若芹、紫安、曼冬、寻巧、寄波、尔槐、以旋、
         初夏、依丝、怜南、傲菡、谷蕊、笑槐、飞兰、笑卉、迎荷、元冬、痴安、妙绿、觅雪、寒安、沛凝、白容、乐蓉、映安、依云、映冬、凡雁、梦秋、
@@ -186,13 +186,18 @@ class TestData(object):
     @staticmethod
     def get_phone_on():
         """生成随机手机号码"""
+        return TestData.get_phone_no()
+
+    @staticmethod
+    def get_phone_no():
+        """生成随机手机号码"""
         phone_head = [130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
                       150, 151, 152, 155, 158,
                       170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
                       181, 186, 187, 188, 189]
-        phone_on = str(random.choice(phone_head)) + "".join(
+        phone_no = str(random.choice(phone_head)) + "".join(
             random.choice("0123456789") for i in range(8))
-        return phone_on
+        return phone_no
 
     @staticmethod
     def get_phone_serial_no():
