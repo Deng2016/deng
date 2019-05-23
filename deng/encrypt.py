@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # coding:utf-8
-"""md5加密函数，可加密字符串与文件
+"""加密模块
 """
-import sys
 import json
+import base64
 import hashlib
-from urllib.parse import urlencode
-import requests
 
 
 class EncryptTools(object):
-    """加密类，目前仅支持md5加密"""
+    """加密类，目前仅支持md5，base64"""
 
     @staticmethod
     def getmd5(paramstr):
@@ -35,3 +33,11 @@ class EncryptTools(object):
         for mytuple in sorted_x:
             str_data += str(mytuple[0])+str(mytuple[1])
         return str_data
+
+    @staticmethod
+    def base64_encode(connect: dict) -> str:
+        return str(base64.b64encode(bytes(json.dumps(connect, ensure_ascii=False), encoding='utf8')), encoding='utf8')
+
+    @staticmethod
+    def base64_decode(connect: str) -> dict:
+        return json.loads(str(base64.b64decode(bytes(connect, encoding='utf8')), encoding='utf8'))
