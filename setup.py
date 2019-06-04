@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="deng",
-    version="0.1.2",
+    version="0.2.0",
     summary="个人常用方法封装——最近更新：线程池添加日志输出",
     home_page="https://github.com/Deng2016/deng",
     author="dengqingyong",
