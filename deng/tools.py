@@ -9,6 +9,7 @@ import re
 import os
 import json 
 import time
+import math
 import socket
 import random
 import string
@@ -133,13 +134,20 @@ class Tools(object):
         return timestamp
 
     @staticmethod
-    def get_current_time(format="long", offset=0):
+    def get_current_time(format: str = "long", offset: int = 0):
         if not isinstance(offset, int):
             offset = 0
+        # 获取当前时间
+        part2, part1 = math.modf(time.time())
+        part1 = time.localtime(part1 - offset)
         if format.lower() == "short":
-            return time.strftime("%Y-%m-%d", time.localtime(time.time() - offset))
+            return time.strftime("%Y-%m-%d", part1)
         else:
-            return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - offset))
+            _temp = time.strftime("%Y-%m-%d %H:%M:%S", part1)
+            if format.lower() == "super":
+                return _temp + str(part2)[1:8]
+            else:
+                return _temp
 
     @staticmethod
     def utc_to_bjtime(utctime):
