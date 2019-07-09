@@ -4,11 +4,15 @@
 from setuptools import setup, find_packages
 
 
+PACKAGE_NAME = "deng"
+PACKAGE_VERSION = "2019.7.9"
+
+
 setup(
-    name="deng",
-    version="0.2.1",
-    summary="个人常用方法封装——最近更新：线程池添加日志输出",
-    home_page="https://github.com/Deng2016/deng",
+    name=PACKAGE_NAME,
+    version=PACKAGE_VERSION,
+    description="个人常用方法封装",
+    url="https://github.com/Deng2016/deng",
     author="dengqingyong",
     author_email="yu12377@163.com",
     packages=find_packages(),

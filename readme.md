@@ -40,11 +40,11 @@ finally:
     conn.close()
 ```
 
-### 2. [线程池-MultiThreading.py](deng/MultiThreading.py)
+### 2. [线程池-multiThreading.py](deng/multiThreading.py)
 ```python
 # ThreadPool线程池使用说明
 # 导入ThreadPool类
-from deng.MultiThreading import ThreadPool
+from deng.multiThreading import ThreadPool
 import random
 
 
@@ -130,18 +130,6 @@ print(blue('蓝色'))
 
 ### 6. [图片处理工具类-colors.py](deng/image.py)
 
-### 7. [邮件处理工具-mailTool.py](deng/mailTool.py)
-```python
-# 导入MailTool类
-from deng.mailTool import MailTool
-
-# 实例化邮件对象
-mail = MailTool(send_username='xxx', send_password='xxx', send_smtp='stmp.qq.com')
-
-# 发送邮件
-mail.send(receiver='接收人邮箱', subject='邮件主题', content='邮件正文', attachs='邮件附件路径')
-```
-
 ## 依赖包安装说明  
 **注意：mac系统或是linux系统跳过此步骤**    
 [windows64位系统安装mysql-python跳坑说明](http://blog.csdn.net/yu12377/article/details/79525470)    
@@ -150,6 +138,11 @@ mail.send(receiver='接收人邮箱', subject='邮件主题', content='邮件正
 ## 远程pip安装
 ```
 pip install git+https://github.com/Deng2016/deng@201801
+```
+
+## requirements.txt引用
+```
+-e git+git@github.com:Deng2016/deng.git@master#egg=deng
 ```
 
 ## 安装应用

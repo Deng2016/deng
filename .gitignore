@@ -9,3 +9,6 @@
 build
 sample/
 deng.egg-info
+/deng.egg-info/
+/sso_auth_client.egg-info/
+/dist/
