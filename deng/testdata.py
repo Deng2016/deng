@@ -5,6 +5,7 @@
 邮箱：yu12377@163.com
 时间：2018/1/12 下午6:20
 """
+import os
 import csv
 import time
 import random
@@ -309,8 +310,9 @@ class TestData(object):
 
     @classmethod
     def get_bank_bin_list(cls):
+        filename = os.path.join(os.path.dirname(__file__), "bank_bin.csv")
         if not cls.__bank_bin_list:
-            with open("bank_bin.csv", newline="") as file:
+            with open(filename, newline="") as file:
                 csv_file = csv.DictReader(file)
                 for line in csv_file:
                     cls.__bank_bin_list.append(line)
