@@ -5,6 +5,7 @@
 邮箱：yu12377@163.com
 时间：2018/1/12 下午6:20
 """
+import csv
 import time
 import random
 import string
@@ -14,8 +15,12 @@ from .addressinfo import addr
 class TestData(object):
     """生成测试数据
     """
+
+    # 银联卡bin列表
+    __bank_bin_list = []
+
     @staticmethod
-    def get_name(gender=''):
+    def get_name(gender=""):
         """获取中国人惯用姓名"""
         firstnames = """
             赵钱孙李，周吴郑王。
@@ -42,7 +47,12 @@ class TestData(object):
             经房裘缪，干解应宗。
             丁宣贲邓，郁单杭洪。"""
 
-        firstnames = firstnames.replace('，', '').replace('。', '').replace('\n', '').replace(' ', '')
+        firstnames = (
+            firstnames.replace("，", "")
+            .replace("。", "")
+            .replace("\n", "")
+            .replace(" ", "")
+        )
         firstname = random.choice(firstnames)
 
         secondname_boy = """
@@ -80,8 +90,12 @@ class TestData(object):
         元柏、代萱、紫真、千青、雪珍、寄琴、绿蕊、醉柳、诗翠、念瑶、孤风、曼彤、怀曼、香巧、采蓝、芷天、尔曼、巧蕊"""
 
         # 随机获取男名与女名
-        grid_name = random.choice(secondname_grid.replace('\n', '').replace(' ', '').split('、'))
-        boy_name = random.choice(secondname_boy.replace('\n', '').replace(' ', '').split('、'))
+        grid_name = random.choice(
+            secondname_grid.replace("\n", "").replace(" ", "").split("、")
+        )
+        boy_name = random.choice(
+            secondname_boy.replace("\n", "").replace(" ", "").split("、")
+        )
 
         # 将两个字的名字随机转换成双字或单字
         if random.randint(1, 3) == 1:
@@ -89,9 +103,9 @@ class TestData(object):
             boy_name = random.choice(boy_name)
 
         # 男名or女名
-        if gender.lower() in ('girl', 'woman'):
+        if gender.lower() in ("girl", "woman"):
             secondname = grid_name
-        elif gender.lower() in ('boy', 'man'):
+        elif gender.lower() in ("boy", "man"):
             secondname = boy_name
         elif isinstance(gender, int):
             if gender % 2 == 0:
@@ -101,7 +115,7 @@ class TestData(object):
         else:
             secondname = random.choice([boy_name, grid_name])
 
-        return '{}{}'.format(firstname, secondname)
+        return "{}{}".format(firstname, secondname)
 
     @staticmethod
     def check_idcards(idcards):
@@ -111,7 +125,7 @@ class TestData(object):
         返回为空时代码校验不通过；
         返回有值时代码校验通过，或是计算模式；
         """
-        check_code = ''
+        check_code = ""
         # 统一转换成字符串类型
         try:
             idcards = str(idcards)
@@ -132,7 +146,7 @@ class TestData(object):
         # 十七位数字本体码权重
         weight = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
         # 对应校验码字符值
-        validate = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
+        validate = ["1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"]
 
         _sum = 0
         _mode = 0
@@ -140,18 +154,17 @@ class TestData(object):
             try:
                 _sum = _sum + int(idcards[i]) * weight[i]
             except TypeError as e:
-                print('输入的身份证号码【{}】前17位必须是数字！'.format(idcards))
+                print("输入的身份证号码【{}】前17位必须是数字！".format(idcards))
         _mode = _sum % 11
         # 计算模式
-        if check_code == '':
+        if check_code == "":
             return validate[_mode]
         # 校验模式——校验通过
         elif check_code == validate[_mode]:
             return check_code
         # 校验模式——校验不通过
         else:
-            return ''
-
+            return ""
 
     @staticmethod
     def get_idcards(sex=0):
@@ -165,7 +178,7 @@ class TestData(object):
         # 日期结束时间：当天
         end_timestamp = round(time.time())
         birthdate_timestamp = random.randrange(start_timestamp, end_timestamp, 86400)
-        birthdate = time.strftime('%Y%m%d', time.localtime(birthdate_timestamp))
+        birthdate = time.strftime("%Y%m%d", time.localtime(birthdate_timestamp))
 
         # part3: 随机获取两位顺序码
         sequence_code = random.randrange(11, 99)
@@ -179,9 +192,13 @@ class TestData(object):
             sex_code = random.randrange(2, 10, 2)
 
         # part5: 计算校验码
-        check_code = TestData.check_idcards('{}{}{}{}'.format(area_code, birthdate, sequence_code, sex_code))
+        check_code = TestData.check_idcards(
+            "{}{}{}{}".format(area_code, birthdate, sequence_code, sex_code)
+        )
 
-        return '{}{}{}{}{}'.format(area_code, birthdate, sequence_code, sex_code, check_code)
+        return "{}{}{}{}{}".format(
+            area_code, birthdate, sequence_code, sex_code, check_code
+        )
 
     @staticmethod
     def get_phone_on():
@@ -191,18 +208,150 @@ class TestData(object):
     @staticmethod
     def get_phone_no():
         """生成随机手机号码"""
-        phone_head = [130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-                      150, 151, 152, 155, 158,
-                      170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
-                      181, 186, 187, 188, 189]
+        phone_head = [
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            150,
+            151,
+            152,
+            155,
+            158,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            176,
+            177,
+            178,
+            179,
+            181,
+            186,
+            187,
+            188,
+            189,
+        ]
         phone_no = str(random.choice(phone_head)) + "".join(
-            random.choice("0123456789") for i in range(8))
+            random.choice("0123456789") for i in range(8)
+        )
         return phone_no
 
     @staticmethod
     def get_phone_serial_no():
         """生成手机串号"""
         serial_no = "".join(random.choice(string.ascii_uppercase) for i in range(4))
-        serial_no += "-" + "".join(random.choice(string.ascii_uppercase) for i in range(4))
+        serial_no += "-" + "".join(
+            random.choice(string.ascii_uppercase) for i in range(4)
+        )
         serial_no += "-" + "".join(random.choice(string.digits) for i in range(5))
         return serial_no
+
+    @classmethod
+    def get_bank_no(
+        cls, bin_no: str = None, bank=None, bank_name=None, ftype="DC", length: int = 19
+    ) -> str:
+        """生成银行卡卡号"""
+        if not bin_no:
+            # 没有传入bin码时随机获取bin码
+            bin_no = cls.get_bank_bin(
+                bank=bank, bank_name=bank_name, ftype=ftype, length=length
+            )
+
+        bin_no = bin_no["bin"]
+        if not bin_no.isdigit():
+            raise ValueError("银行卡BIN应该为6位数字")
+
+        # 中间数字长度=长度 - 6位bin长度 - 末位校验码
+        part2_length = length - len(bin_no) - 1
+        bank_part2 = ""
+        for i in range(part2_length):
+            bank_part2 += str(random.randint(0, 9))
+
+        # 计算末尾校验码
+        bank_no = bin_no + bank_part2
+        fsum = 0
+        _index = 0
+        while True:
+            _index -= 1
+            try:
+                _value = int(bank_no[_index])
+            except IndexError as e:
+                break
+            # 判断位置
+            if abs(_index) % 2 == 1:
+                # 倒数：奇数位时*2
+                _value *= 2
+                if _value >= 10:
+                    # 十位数时：取个位数字与十位数字相加
+                    fsum += _value - 9
+                else:
+                    # 个位数时：直接采用
+                    fsum += _value
+            else:
+                # 倒数：偶数位时直接相加
+                fsum += _value
+        # 拼接末尾校验码
+        if fsum % 10 == 0:
+            check_no = 0
+        else:
+            check_no = 10 - fsum % 10
+        bank_no += str(check_no)
+        return bank_no
+
+    @classmethod
+    def get_bank_bin_list(cls):
+        if not cls.__bank_bin_list:
+            with open("bank_bin.csv", newline="") as file:
+                csv_file = csv.DictReader(file)
+                for line in csv_file:
+                    cls.__bank_bin_list.append(line)
+        return cls.__bank_bin_list
+
+    @classmethod
+    def get_bank_bin(
+        cls,
+        bank: str = None,
+        bank_name: str = None,
+        ftype: str = "DC",
+        length: int = 19,
+    ):
+        """获取银行卡bin码"""
+        length = str(length)
+        bin_list = []
+        for _bin in cls.get_bank_bin_list():
+            if bank:
+                if (
+                    _bin["bank"] == bank
+                    and _bin["type"] == ftype
+                    and _bin["length"] == length
+                ):
+                    bin_list.append(_bin)
+            elif bank_name:
+                if (
+                    _bin["type"] == ftype
+                    and _bin["length"] == length
+                    and _bin["name"].startswith(bank_name)
+                ):
+                    bin_list.append(_bin)
+            else:
+                if _bin["type"] == ftype and _bin["length"] == length:
+                    bin_list.append(_bin)
+        if not bin_list:
+            if ftype == "CC" and int(length) > 16:
+                raise ValueError("找不到对应的bin码，信用卡通常是16位，请检查输入length参数")
+            raise ValueError("找不到对应的bin码，请检查输入是否正确！")
+        return random.choice(bin_list)
+
+
+if __name__ == "__main__":
+    # print(TestData.get_bank_no(628888, 10))
+    print(TestData.get_bank_no())
