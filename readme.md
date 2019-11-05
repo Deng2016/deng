@@ -173,4 +173,9 @@ python setup.py sdist --formats=gztar
 pip install deng-0.1.tar.gz
 ```
 
+## 将包发布到pipy
+```
+twine upload dist/*
+```
+
 [打包参考资料](http://www.bjhee.com/setuptools.html)

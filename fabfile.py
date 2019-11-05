@@ -6,16 +6,16 @@ from deng.colors import *
 
 # 需要部署的环境
 servers = [
-    # {"host": "apidev", "virtualenv": "api_test"},
-    # {"host": "apidev", "virtualenv": "ifd"},
-    # {"host": "apidev", "virtualenv": "dubbo_start"},
-    # {"host": "apidev", "virtualenv": "mock_service"},
+    {"host": "apidev", "virtualenv": "api_test"},
+    {"host": "apidev", "virtualenv": "ifd"},
+    {"host": "apidev", "virtualenv": "dubbo_start"},
+    {"host": "apidev", "virtualenv": "mock_service"},
     {"host": "apidev", "virtualenv": "data_factory"},
-    # {"host": "apiweb", "virtualenv": "api_test"},
-    # {"host": "apiweb", "virtualenv": "ifd"},
-    # {"host": "apiweb", "virtualenv": "dubbo_start"},
-    # {"host": "apiweb", "virtualenv": "mock_service"},
-    # {"host": "apiweb", "virtualenv": "user_center"},
+    {"host": "apiweb", "virtualenv": "api_test"},
+    {"host": "apiweb", "virtualenv": "ifd"},
+    {"host": "apiweb", "virtualenv": "dubbo_start"},
+    {"host": "apiweb", "virtualenv": "mock_service"},
+    {"host": "apiweb", "virtualenv": "user_center"},
     {"host": "apiweb", "virtualenv": "data_factory"},
 ]
 
@@ -52,6 +52,7 @@ def _deploy(c, filename):
     """更新程序包"""
     package_name = '-'.join(filename.split('-')[:-1])
     print(blue("部署：部署新版"))
+    c.run("pip install --upgrade pip")
     c.run(f"pip install {filename}")
     print(blue(f"查看{package_name}包信息"))
     c.run(f"pip show {package_name}")
