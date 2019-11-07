@@ -5,20 +5,17 @@
 邮箱：yu12377@163.com
 时间：2018/1/12 下午6:20
 """
-import os
-import csv
+import json
 import time
 import random
 import string
-from .addressinfo import addr
+from deng.addressinfo import addr
+from deng.bankinfo import bank_bin_list
 
 
 class TestData(object):
     """生成测试数据
     """
-
-    # 银联卡bin列表
-    __bank_bin_list = []
 
     @staticmethod
     def get_name(gender=""):
@@ -258,27 +255,35 @@ class TestData(object):
 
     @classmethod
     def get_bank_no(
-        cls, bin_no: str = None, bank=None, bank_name=None, ftype="DC", length: int = 19
+        cls, num=1, bank=None, bank_name=None, ftype=None, length=None
     ) -> str:
         """生成银行卡卡号"""
-        if not bin_no:
-            # 没有传入bin码时随机获取bin码
-            bin_no = cls.get_bank_bin(
-                bank=bank, bank_name=bank_name, ftype=ftype, length=length
-            )
 
-        bin_no = bin_no["bin"]
-        if not bin_no.isdigit():
+        if length and (int(length) < 16 or int(length) > 19):
+            raise ValueError("银联卡号通常是16到19数字，请检查输入的length参数")
+
+        # 获取参数获取bin码
+        bin_list = cls.get_bank_bin(
+            num=num, bank=bank, bank_name=bank_name, ftype=ftype, length=length
+        )
+
+        for bin in bin_list:
+            cls.__get_bank_no(bin_obj=bin)
+        return bin_list
+
+    @classmethod
+    def __get_bank_no(cls, bin_obj):
+        if not bin_obj["bin"].isdigit():
             raise ValueError("银行卡BIN应该为6位数字")
 
         # 中间数字长度=长度 - 6位bin长度 - 末位校验码
-        part2_length = length - len(bin_no) - 1
+        part2_length = int(bin_obj["length"]) - len(bin_obj["bin"]) - 1
         bank_part2 = ""
         for i in range(part2_length):
             bank_part2 += str(random.randint(0, 9))
 
         # 计算末尾校验码
-        bank_no = bin_no + bank_part2
+        bank_no = bin_obj["bin"] + bank_part2
         fsum = 0
         _index = 0
         while True:
@@ -306,54 +311,40 @@ class TestData(object):
         else:
             check_no = 10 - fsum % 10
         bank_no += str(check_no)
-        return bank_no
-
-    @classmethod
-    def get_bank_bin_list(cls):
-        filename = os.path.join(os.path.dirname(__file__), "bank_bin.csv")
-        if not cls.__bank_bin_list:
-            with open(filename, newline="") as file:
-                csv_file = csv.DictReader(file)
-                for line in csv_file:
-                    cls.__bank_bin_list.append(line)
-        return cls.__bank_bin_list
+        bin_obj["no"] = bank_no
+        return bin_obj
 
     @classmethod
     def get_bank_bin(
         cls,
+        num: int = 1,
         bank: str = None,
         bank_name: str = None,
-        ftype: str = "DC",
-        length: int = 19,
+        ftype: str = None,
+        length: str = None,
     ):
         """获取银行卡bin码"""
-        length = str(length)
+        if length:
+            length = str(length)
         bin_list = []
-        for _bin in cls.get_bank_bin_list():
-            if bank:
-                if (
-                    _bin["bank"] == bank
-                    and _bin["type"] == ftype
-                    and _bin["length"] == length
-                ):
-                    bin_list.append(_bin)
-            elif bank_name:
-                if (
-                    _bin["type"] == ftype
-                    and _bin["length"] == length
-                    and _bin["name"].startswith(bank_name)
-                ):
-                    bin_list.append(_bin)
-            else:
-                if _bin["type"] == ftype and _bin["length"] == length:
-                    bin_list.append(_bin)
+        # 根据条件过滤
+        for _bin in bank_bin_list:
+            if bank and _bin["bank"] != bank:
+                continue
+            if bank_name and not _bin["name"].startswith(bank_name):
+                continue
+            if ftype and _bin["type"] != ftype:
+                continue
+            if length and _bin["length"] != length:
+                continue
+            bin_list.append(_bin)
         if not bin_list:
             if ftype == "CC" and int(length) > 16:
-                raise ValueError("找不到对应的bin码，信用卡通常是16位，请检查输入length参数")
+                raise ValueError("找不到对应的bin码，信用卡通常是16位，请检查输入的length参数")
             raise ValueError("找不到对应的bin码，请检查输入是否正确！")
-        return random.choice(bin_list)
+        return random.choices(bin_list, k=num)
 
 
 if __name__ == "__main__":
     # print(TestData.get_bank_no(628888, 10))
-    print(TestData.get_bank_no())
+    print(json.dumps(TestData.get_bank_no(num=3), indent=4, ensure_ascii=False))
