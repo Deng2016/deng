@@ -2,6 +2,34 @@
 
 
 ## 更新历史
+### 2019-11-07
+* 新增生成银联卡卡号方法，可通过[支付宝校验](https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo=9400621673734008267&cardBinCheck=true)
+```python
+from deng.testdata import TestData
+
+# param bank: 银行简称，大写字母，如工行ICBC，银行CCB，农行ABC等——非必填，默认随机
+# param ftype: 卡片类型，储蓄卡DC，信用卡CC——非必填，默认随机
+# param length: 卡号长度，信用卡基本上都是16位，储蓄卡通常16至19位，最长19位，但偶尔有低有16位的——非必填，默认随机
+# param num: 一次生成的卡号数量——非必填，默认1
+
+# 随机生成一个银联卡号
+print(TestData.get_bank_no())
+
+# 一次性生成指定数量的银联卡号
+print(TestData.get_bank_no(num=5))
+
+# 随机生成中国工商银行银行卡号
+print(TestData.get_bank_no(bank="ICBC"))
+
+# 随机生成中国工商银行信用卡号
+print(TestData.get_bank_no(bank="ICBC", ftype="CC"))
+
+# 随机生成中国工商银行储蓄卡号
+print(TestData.get_bank_no(bank="ICBC", ftype="DC"))
+
+# 随机生成中国工商银行16位储蓄卡号
+print(TestData.get_bank_no(bank="ICBC", ftype="DC", length=16))
+```
 
 ### 2018-04-20  
 * 新增to_dict方法，将x-www-form-urlencoded格式字符串转换成dict  
