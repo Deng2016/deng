@@ -257,7 +257,12 @@ class TestData(object):
     def get_bank_no(
         cls, num=1, bank=None, bank_name=None, ftype=None, length=None
     ) -> str:
-        """生成银行卡卡号"""
+        """生成银联卡卡号
+        :param bank: 银行简称，大写字母，如工行ICBC，建行CCB，农行ABC等——非必填，默认随机
+        :param ftype: 卡片类型，储蓄卡DC，信用卡CC——非必填，默认随机
+        :param length: 卡号长度，信用卡基本上都是16位，储蓄卡通常16至19位，最长19位，但偶尔有低有16位的——非必填，默认随机
+        :param num: 一次生成的卡号数量——非必填，默认1
+        """
 
         if length and (int(length) < 16 or int(length) > 19):
             raise ValueError("银联卡号通常是16到19数字，请检查输入的length参数")

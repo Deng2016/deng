@@ -32,7 +32,7 @@ TestData.get_phone_on()
 TestData.get_phone_serial_no()
 
 # 生成银联卡卡号说明
-# param bank: 银行简称，大写字母，如工行ICBC，银行CCB，农行ABC等——非必填，默认随机
+# param bank: 银行简称，大写字母，如工行ICBC，建行CCB，农行ABC等——非必填，默认随机
 # param ftype: 卡片类型，储蓄卡DC，信用卡CC——非必填，默认随机
 # param length: 卡号长度，信用卡基本上都是16位，储蓄卡通常16至19位，最长19位，但偶尔有低有16位的——非必填，默认随机
 # param num: 一次生成的卡号数量——非必填，默认1
