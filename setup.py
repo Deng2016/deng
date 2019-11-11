@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 
 PACKAGE_NAME = "deng"
-PACKAGE_VERSION = "2019.11.7"
+PACKAGE_VERSION = "2019.11.11"
 
 
 setup(

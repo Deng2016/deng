@@ -254,14 +254,13 @@ class TestData(object):
         return serial_no
 
     @classmethod
-    def get_bank_no(
-        cls, num=1, bank=None, bank_name=None, ftype=None, length=None
-    ) -> str:
+    def get_bank_no(cls, num=1, bank=None, bank_name=None, ftype=None, length=None, first=None):
         """生成银联卡卡号
         :param bank: 银行简称，大写字母，如工行ICBC，建行CCB，农行ABC等——非必填，默认随机
         :param ftype: 卡片类型，储蓄卡DC，信用卡CC——非必填，默认随机
         :param length: 卡号长度，信用卡基本上都是16位，储蓄卡通常16至19位，最长19位，但偶尔有低有16位的——非必填，默认随机
         :param num: 一次生成的卡号数量——非必填，默认1
+        :param first: 为True时返回一个对象，非True时返回列表
         """
 
         if length and (int(length) < 16 or int(length) > 19):
@@ -274,7 +273,10 @@ class TestData(object):
 
         for bin in bin_list:
             cls.__get_bank_no(bin_obj=bin)
-        return bin_list
+        if first:
+            return bin_list[0]
+        else:
+            return bin_list
 
     @classmethod
     def __get_bank_no(cls, bin_obj):
@@ -347,9 +349,13 @@ class TestData(object):
             if ftype == "CC" and int(length) > 16:
                 raise ValueError("找不到对应的bin码，信用卡通常是16位，请检查输入的length参数")
             raise ValueError("找不到对应的bin码，请检查输入是否正确！")
-        return random.choices(bin_list, k=num)
+        if num <= 0:
+            return bin_list
+        else:
+            return random.choices(bin_list, k=num)
 
 
 if __name__ == "__main__":
     # print(TestData.get_bank_no(628888, 10))
-    print(json.dumps(TestData.get_bank_no(num=3), indent=4, ensure_ascii=False))
+    # print(len(TestData.get_bank_bin(bank="CCB", ftype="DC", num=0)))
+    print(json.dumps(TestData.get_bank_no(num=1, first=True), indent=4, ensure_ascii=False))
