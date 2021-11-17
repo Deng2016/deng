@@ -7,7 +7,12 @@
 """
 from random import randint
 from os.path import dirname, basename, join, exists
-from PIL import Image, ImageDraw, ImageFont
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError as e:
+    import os
+    os.system('pip install Pillow')
+    from PIL import Image, ImageDraw, ImageFont
 
 
 class ImageTools(object):

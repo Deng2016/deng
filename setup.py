@@ -5,8 +5,7 @@ from setuptools import setup, find_packages
 
 
 PACKAGE_NAME = "deng"
-PACKAGE_VERSION = "2019.11.11"
-
+PACKAGE_VERSION = "2022.02.10"
 
 setup(
     name=PACKAGE_NAME,
@@ -18,9 +17,13 @@ setup(
     packages=find_packages(),
     exclude_package_data={"": [".gitignore"]},
     install_requires=[
-        "requests>=2.18.2",
-        "python-dateutil>=1.5",
-        "requests-html>=0.9.0",
+        "requests==2.26.0",
+        "requests-html==0.10.0",
+        "redis==3.5.3",
+        "baidu-aip==2.2.18.0",
+        "pycryptodome==3.11.0",
+        "xpinyin==0.7.6",
+        "pysmb==1.2.6",
         ],
     classifiers=[
         'Programming Language :: Python',
@@ -31,6 +34,8 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Software Development :: Libraries'
     ]
 )
