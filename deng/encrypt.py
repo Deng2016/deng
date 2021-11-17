@@ -1,43 +1,65 @@
-#!/usr/bin/env python
-# coding:utf-8
-"""加密模块
-"""
-import json
 import base64
 import hashlib
+import datetime
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 
 
-class EncryptTools(object):
-    """加密类，目前仅支持md5，base64"""
+def to_encode(connect: str) -> str:
+    return str(
+        base64.b64encode(bytes(connect, encoding="utf8")),
+        encoding="utf8",
+    )
 
-    @staticmethod
-    def getmd5(paramstr):
-        """计算MD5值"""
-        if isinstance(paramstr, int):
-            paramstr = str(paramstr)
-        try:
-            _hash = hashlib.md5()
-            _hash.update(paramstr.encode('UTF-8'))
-        except ImportError:
-            # for Python << 2.5
-            import md5
-            _hash = md5.new()
-            _hash.update(paramstr)
-        return _hash.hexdigest()
 
-    @staticmethod
-    def join_array(param_dict):
-        """将字典参数按升序排序并及拼接成字符串"""
-        str_data = ''
-        sorted_x = sorted(iter(param_dict.items()), key=lambda param_dict : param_dict[0])
-        for mytuple in sorted_x:
-            str_data += str(mytuple[0])+str(mytuple[1])
-        return str_data
+def to_decode(connect: str) -> str:
+    return str(base64.b64decode(bytes(connect, encoding="utf8")), encoding="utf8")
 
-    @staticmethod
-    def base64_encode(connect: dict) -> str:
-        return str(base64.b64encode(bytes(json.dumps(connect, ensure_ascii=False), encoding='utf8')), encoding='utf8')
 
-    @staticmethod
-    def base64_decode(connect: str) -> dict:
-        return json.loads(str(base64.b64decode(bytes(connect, encoding='utf8')), encoding='utf8'))
+class CommanderCrypto(object):
+    """V5.5.5之后的加密算法"""
+
+    secret = "awsomerobot" + str(datetime.datetime.now().year)
+
+    @classmethod
+    def encrypt(cls, data, xsrf_token="") -> str:
+        """加密"""
+        if xsrf_token:
+            key = cls.sha256(xsrf_token)
+        else:
+            key = cls.secret
+        if len(key) >= 32:
+            key = key[:32]
+        else:
+            key = cls.__add_to_32(key)
+        cipher1 = AES.new(key=key.encode("utf-8"), mode=AES.MODE_ECB)
+        ct = cipher1.encrypt(pad(data.encode("utf-8"), 16))
+        encrypt_data = base64.b64encode(ct)
+        return encrypt_data.decode("utf-8")
+
+    @classmethod
+    def decrypt(cls, data, xsrf_token="") -> str:
+        """解密"""
+        if xsrf_token:
+            key = cls.sha256(xsrf_token)
+        else:
+            key = cls.secret
+        if len(key) >= 32:
+            key = key[:32]
+        else:
+            key = cls.__add_to_32(key)
+        ct = base64.b64decode(data)
+        cipher2 = AES.new(key=key.encode("utf-8"), mode=AES.MODE_ECB)
+        pt = unpad(cipher2.decrypt(ct), 16)
+        return pt.decode("utf-8")
+
+    @classmethod
+    def __add_to_32(cls, text):
+        while len(text) % 32 != 0:
+            text += "\0"
+        return text
+
+    @classmethod
+    def sha256(cls, data):
+        """sha256加密"""
+        return hashlib.sha256(data.encode("utf-8")).hexdigest()
