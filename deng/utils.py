@@ -1,6 +1,7 @@
 """工具函数，与打包逻辑无直接关联"""
 # coding = utf-8
 import uuid
+import json
 import logging
 import inspect
 import datetime
@@ -86,6 +87,23 @@ def my_json_serializable(o):
     try:
         return str(o)
     except Exception:
+        raise TypeError(
+            f"Object of type {o.__class__.__name__} " f"is not JSON serializable"
+        )
+
+
+class MyJSONEncoder(json.encoder.JSONEncoder):
+    """自定义JSON序列化类"""
+
+    def default(self, o):
+        if isinstance(o, datetime.datetime):
+            return o.strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(o, datetime.date):
+            return o.strftime("%Y-%m-%d")
+        if isinstance(o, uuid.UUID):
+            return str(o)
+        if hasattr(o, "__html__"):
+            return str(o.__html__())
         raise TypeError(
             f"Object of type {o.__class__.__name__} " f"is not JSON serializable"
         )
