@@ -1,3 +1,4 @@
+import sys
 import logging
 from typing import List
 
@@ -5,7 +6,17 @@ from typing import List
 # 始终显示所有HTTP请求的详情
 ALWAYS_ECHO_RESULT = False
 
+log_format = logging.Formatter(
+    "[%(asctime)s] %(filename)s/%(lineno)s/%(funcName)s/%(levelname)s: %(message)s"
+)
+
+console_handler = logging.StreamHandler(stream=sys.stdout)
+console_handler.setFormatter(log_format)
+console_handler.setLevel(logging.DEBUG)
+
 logger = logging.getLogger("DengUtils")
+logger.addHandler(console_handler)
+logger.setLevel(logging.DEBUG)
 
 
 def configure_logger(level: int, handlers: List[logging.Handler]):
@@ -33,4 +44,4 @@ def configure_logger(level: int, handlers: List[logging.Handler]):
         else:
             raise TypeError(f"类型错误，预期为{logging.Handler}类型，实际为{type(handler)}类型")
 
-    logger.debug("日志配置完成")
+    logger.info("日志配置完成")

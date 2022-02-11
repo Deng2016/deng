@@ -1,5 +1,6 @@
 """工具函数，与打包逻辑无直接关联"""
 # coding = utf-8
+import os
 import uuid
 import json
 import logging
@@ -20,20 +21,31 @@ class ExecuteCMDException(Exception):
     pass
 
 
+def pop_key_from_dict(my_dict: dict, key, default=None):
+    if key in my_dict:
+        value = my_dict.pop(key)
+    else:
+        value = default
+    return value
+
+
 def execute_cmd(
     *popenargs,
     input=None,
     capture_output=True,
     timeout=None,
     check=False,
-    level="debug",
+    level="info",
     encoding="utf-8",
     **kwargs,
 ):
+    """通过subprocess库执行命令行"""
     kwargs["input"] = input
     kwargs["capture_output"] = capture_output
     kwargs["timeout"] = timeout
     kwargs["check"] = check
+    ignore_error_log = pop_key_from_dict(kwargs, "ignore_error_log", default=True)
+    cmd_output_level = pop_key_from_dict(kwargs, "cmd_output_level", default=level)
     if encoding:
         kwargs["encoding"] = encoding
     if isinstance(popenargs, Sequence):
@@ -41,6 +53,9 @@ def execute_cmd(
             cmd_text = popenargs[0]
         elif isinstance(popenargs[0], Sequence):
             cmd_text = " ".join(popenargs[0])
+        elif isinstance(popenargs[0], Path):
+            cmd_text = popenargs[0].name
+            kwargs["cwd"] = popenargs[0].parent
         else:
             raise ValueError(f"参数遇到未知情况：{popenargs}")
     else:
@@ -48,17 +63,41 @@ def execute_cmd(
 
     if level:
         getattr(logger, level)(f"执行命令：{cmd_text}")
-    _res = subprocess.run(*popenargs, **kwargs)
-    if _res.returncode == 0:
-        if _res.stdout:
-            if level:
-                getattr(logger, level)(_res.stdout)
-        return _res
-    else:
-        error_output = byte_to_str(_res.stderr or _res.stdout)
-        error_msg = f"执行命令出错：{cmd_text}\n{error_output}"
-        logger.error(error_msg)
-        raise ExecuteCMDException(error_msg)
+
+    # 增加异常兼容逻辑，处理npm时的可能报错
+    for run_count in range(2):
+        try:
+            _res = subprocess.run(*popenargs, **kwargs)
+        except IndexError as e:
+            if run_count == 0:
+                logger.exception(e)
+                logger.warning(f"运行报错，当前{capture_output=}，翻转capture_output参数，再次尝试运行……")
+                kwargs["capture_output"] = not kwargs["capture_output"]
+            else:
+                error_msg = f"执行命令出错：{os.getcwd()} - {cmd_text}\n{str(e)}"
+                if not ignore_error_log:
+                    logger.error(error_msg)
+                raise ExecuteCMDException(error_msg)
+        except Exception as e:
+            error_msg = f"执行命令出错：{os.getcwd()} - {cmd_text}\n{str(e)}"
+            if not ignore_error_log:
+                logger.error(error_msg)
+            raise ExecuteCMDException(error_msg)
+        else:
+            if _res.returncode == 0:
+                if _res.stdout and cmd_output_level:
+                    # 有些命令如npm，会将警告信息打印在stderr中
+                    output = f"{byte_to_str(_res.stderr)}\n{byte_to_str(_res.stdout)}"
+                    getattr(logger, cmd_output_level)(output)
+                return _res
+            else:
+                error_output = (
+                    byte_to_str(_res.stderr) + "\n" + byte_to_str(_res.stdout)
+                )
+                error_msg = f"执行命令出错：{os.getcwd()} - {cmd_text}\n{error_output}"
+                if not ignore_error_log:
+                    logger.error(error_msg)
+                raise ExecuteCMDException(error_msg)
 
 
 def check_shell_run_result(res_code, desc=""):
