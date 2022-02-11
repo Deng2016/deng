@@ -38,7 +38,7 @@ def check_branch_exist(
     else:
         try:
             utils.execute_cmd(
-                ["git", "switch", branch], level="debug", ignore_error_log=True
+                ["git", "checkout", branch], level="debug", ignore_error_log=True
             )
         except Exception as e:
             logger.debug(f"【{repo_path}】本地库中不存在【{branch}】分支")
@@ -204,7 +204,7 @@ def pull_repo(
         if branch_exist:
             # 远程分支存在时拉取更新
             utils.execute_cmd(["git", "fetch", remote, branch], level="debug")
-            utils.execute_cmd(["git", "switch", branch], level="debug")
+            utils.execute_cmd(["git", "checkout", branch], level="debug")
             utils.execute_cmd(["git", "merge"], level="debug")
         else:
             # 远程分支不存在时判断本地是否存在指定分支
@@ -216,7 +216,7 @@ def pull_repo(
                 if no_exist_create_modle and no_exist_create_modle != branch:
                     # 本地不存在时基于模板分支创建指定分支
                     utils.execute_cmd(["git", "branch", branch, no_exist_create_modle])
-                    utils.execute_cmd(["git", "switch", branch])
+                    utils.execute_cmd(["git", "checkout", branch])
                     utils.execute_cmd(["git", "push", "-u", remote, branch])
                 else:
                     raise ValueError(f"库{repo_name}远程分支不存在：{branch}")
@@ -357,7 +357,7 @@ def create_branch_by_tag(
         # 开始创建新分支
         utils.execute_cmd(["git", "branch", branch_name, tag_name])
     # 切换到新分支
-    utils.execute_cmd(["git", "switch", branch_name])
+    utils.execute_cmd(["git", "checkout", branch_name])
     # 将新分支推送到远程库
     utils.execute_cmd(["git", "push", "-u", "origin", branch_name])
     return True
