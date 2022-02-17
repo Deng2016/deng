@@ -305,7 +305,7 @@ def parser_git_url(repo_url: str) -> tuple:
     elif repo_url.startswith("git"):
         return repo_url.split("/")[-2].split(":")[-1], repo_url.split("/")[-1]
     else:
-        return tuple()
+        return None, None
 
 
 def get_repo_info(repo_path: Union[str, Path], remote="origin"):

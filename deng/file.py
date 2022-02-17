@@ -8,6 +8,7 @@ import tarfile
 import zipfile
 import logging
 import datetime
+import configparser
 from pathlib import Path
 from typing import Union
 
@@ -92,17 +93,26 @@ def compress_zip(src_path: str, compress_abs_path: str) -> None:
                 )
 
 
-def extract_zip(src_zip: str, dst_dir: str) -> None:
+def extract_zip(src_zip: Union[str, Path], dst_dir: Union[str, Path]) -> None:
     """解压zip文件
-    :param src_zip: 待解压压缩包路径
-    :param dst_dir: 解压目的路径
+    :param src_zip: str or Path, 需要解压的zip文件绝对路径
+    :param dst_dir: str or Path, 解压后存储的目标目录
     """
+    if isinstance(src_zip, str):
+        src_zip = Path(src_zip)
+    if isinstance(dst_dir, str):
+        dst_dir = Path(dst_dir)
+
     # zip文件不存在时报错
-    check_path_is_exits(src_zip, path_type="file")
+    if not src_zip.exists():
+        raise ValueError(f"zip文件不存在：{src_zip}")
 
     # 解压目录不存在时新建
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir)
+    if not dst_dir.exists():
+        dst_dir.mkdir(parents=True)
+
+    if dst_dir.is_file():
+        raise ValueError(f"{dst_dir}不是一个有效的目录")
 
     if zipfile.is_zipfile(src_zip):
         fz = zipfile.ZipFile(src_zip, "r")
@@ -203,10 +213,12 @@ def copy_to_target(
     if src_path.is_dir():
         if dst_path.exists():
             # 将目录复制到已经存在的目录下
-            shutil.copytree(str(src_path), str(dst_path / src_path.name))
+            shutil.copytree(
+                str(src_path), str(dst_path / src_path.name), dirs_exist_ok=True
+            )
         else:
             # 复制源目标生成指定的新目录
-            shutil.copytree(str(src_path), str(dst_path))
+            shutil.copytree(str(src_path), str(dst_path), dirs_exist_ok=True)
             return
 
 
@@ -322,6 +334,9 @@ def save_json_to_file(
     file_abs_path: Union[Path, str],
     exist_ok=True,
     encoding="utf-8",
+    ensure_ascii=False,
+    indent=2,
+    cls=None,
 ):
     """将字典、列表、元组保存到文件中"""
     file_abs_path = Path(file_abs_path)
@@ -333,7 +348,9 @@ def save_json_to_file(
         file_abs_path.parent.mkdir(parents=True)
 
     with open(file_abs_path, mode="w", encoding=encoding) as _file:
-        return json.dump(content, _file, ensure_ascii=False, indent=2)
+        return json.dump(
+            content, _file, ensure_ascii=ensure_ascii, indent=indent, cls=cls
+        )
 
 
 def get_newest_file(target: str, _type: str = "c"):
@@ -370,3 +387,16 @@ def get_file_time(file_path: Union[Path, str], _type: str = "c", _return=None):
             return round(_time_obj.timestamp())
         else:
             return _time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_ini_config_object(config_path: Path):
+    """获取config.ini配置文件对象"""
+    __config = configparser.ConfigParser()
+    __config.read(config_path, encoding="utf-8")
+    return __config
+
+
+def save_ini_config_object(config_path: Path, _object: configparser.ConfigParser):
+    """保存配置文件到config.int中"""
+    with open(config_path, mode="w", encoding="utf-8") as _file:
+        _object.write(_file)

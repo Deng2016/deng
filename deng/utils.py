@@ -3,6 +3,7 @@
 import os
 import uuid
 import json
+import time
 import logging
 import inspect
 import datetime
@@ -10,6 +11,7 @@ import subprocess
 from typing import Sequence
 from pathlib import Path
 from decimal import Decimal
+from functools import wraps
 
 
 logger = logging.getLogger("DengUtils")
@@ -178,6 +180,10 @@ def byte_to_str(src, encoding=None):
     return src.strip() if isinstance(src, str) else src
 
 
+def bytes_to_str(src, encoding=None):
+    return byte_to_str(src, encoding=encoding)
+
+
 def to_boolean(flag, default=False):
     """将字符串或数字转换成布尔型"""
     if isinstance(flag, bool):
@@ -208,3 +214,20 @@ def get_digit_from_input(params=None):
         else:
             print("输入的不是一个数字！")
     return num_int
+
+
+def stat_func_elapsed(func):
+    """装饰器：统计被装饰方法的运行耗时"""
+
+    @wraps(func)
+    def _stat_func_elapsed(*args, **kwargs):
+        func_name = func.__name__
+        func_desc = func.__doc__.strip().split()[0] or ""
+        logger.info(f"开始运行：{func_name}（{func_desc}）")
+        start_time = time.perf_counter()
+        res = func(*args, **kwargs)
+        elapsed = round(time.perf_counter() - start_time, 3)
+        logger.info(f"结束运行：{func_name}（{func_desc}），耗时：{elapsed}秒")
+        return res
+
+    return _stat_func_elapsed

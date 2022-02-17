@@ -2,9 +2,13 @@ import re
 import socket
 import logging
 import requests
+from typing import Union
 from pathlib import Path
 from contextlib import closing
 from urllib.parse import urlparse
+
+from . import file as file_utils
+from . import encrypt as encrypt_utils
 
 
 logger = logging.getLogger("DengUtils")
@@ -91,3 +95,32 @@ def download_file(url: str, file_save_path: Path):
         return True
     else:
         raise FileNotFoundError(f"下载失败：{url}")
+
+
+def download_and_check_md5(url: str, target: Union[str, Path], md5: str = ""):
+    """下载文件"""
+    target = Path(target) if not isinstance(target, Path) else target
+
+    # 检查需要下载的文件是否已经存在，如果存在且md5相同则直接使用
+    if target.exists():
+        if md5 and encrypt_utils.md5sum(_file_path=target) == md5:
+            logger.info(f"本地已经存在目标文件，且md5校验通过，跳过下载：{target}")
+            return
+        target.unlink(missing_ok=True)
+
+    # 检查下载目标存储路径是否存在，不存在时创建，防止后续报错
+    if not target.parent.exists():
+        target.parent.mkdir(parents=True)
+
+    logger.debug(f"开始下载文件：{url}=>{target}")
+    res = requests.get(url, stream=True)
+    with open(target, mode="wb") as file:
+        for packet in res.iter_content(chunk_size=5 * 1024 * 1024):
+            if packet:
+                file.write(packet)
+    if md5:
+        assert encrypt_utils.md5sum(_file_path=target) == md5
+        logger.info(f"下载完成且md5校验通过：{target}")
+        return
+    file_utils.check_path_is_exits(target, path_type="file")
+    logger.info(f"下载完成，跳过md5：{target}")
