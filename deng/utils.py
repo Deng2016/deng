@@ -160,7 +160,7 @@ def get_caller_info(level: int = 0) -> tuple:
     return func_name, desc
 
 
-def byte_to_str(src, encoding=None):
+def byte_to_str(src, encoding=None) -> str:
     if isinstance(src, bytes):
         error_list = []
         encoding_list = ["utf-8", "GBK", "GB2312", "GB18030", "ISO-8859-1"]
@@ -177,7 +177,9 @@ def byte_to_str(src, encoding=None):
                 error_list.append(e)
         if error_list:
             logger.warning(f"bytes转换成str时出错，尝试的编码有：{encoding_list}，原始对象：{src}")
-    return src.strip() if isinstance(src, str) else src
+    elif src is None:
+        return ""
+    return src.strip() if isinstance(src, str) else str(src)
 
 
 def bytes_to_str(src, encoding=None):
