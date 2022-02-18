@@ -39,7 +39,7 @@ def check_path_is_exits(src_path: Union[str, Path], path_type=None):
             raise FileNotFoundError(f"{src_path}不是有效的目录！")
 
 
-def ensure_empty_dir(target: Union[str, Path], mkdir=True, parents=True) -> None:
+def ensure_empty_dir(target: Union[str, Path], mkdir=True, parents=True, *args, **kwargs) -> None:
     """确保目录为空目录
     :param target: 目标目录路径
     :param mkdir: bool, 目标目录不存在时自动创建
@@ -64,13 +64,14 @@ def ensure_empty_dir(target: Union[str, Path], mkdir=True, parents=True) -> None
                     # 防止报错，有时rmtree删除命令返回成功，但目录并还没有被删除完成，直接创建目录会报错
                     time.sleep(2)
                     if mkdir:
-                        target.mkdir(parents)
+                        target.mkdir(parents=parents)
                         logger.info(f"创建目录成功：{target}")
             else:
                 if mkdir:
-                    target.mkdir(parents)
+                    target.mkdir(parents=parents)
                     logger.info(f"创建目录成功：{target}")
         except Exception as e:
+            logger.exception(e)
             time.sleep(1)
         else:
             break
