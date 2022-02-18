@@ -73,7 +73,9 @@ def execute_cmd(
         except IndexError as e:
             if run_count == 0:
                 logger.exception(e)
-                logger.warning(f"运行报错，当前capture_output={capture_output}，翻转capture_output参数，再次尝试运行……")
+                logger.warning(
+                    f"运行报错，当前capture_output={capture_output}，翻转capture_output参数，再次尝试运行……"
+                )
                 kwargs["capture_output"] = not kwargs["capture_output"]
             else:
                 error_msg = f"执行命令出错：{os.getcwd()} - {cmd_text}\n{str(e)}"
@@ -93,9 +95,7 @@ def execute_cmd(
                     getattr(logger, cmd_output_level)(output)
                 return _res
             else:
-                error_output = (
-                    byte_to_str(_res.stderr) + "\n" + byte_to_str(_res.stdout)
-                )
+                error_output = f"{byte_to_str(_res.stderr)}\n{byte_to_str(_res.stdout)}"
                 error_msg = f"执行命令出错：{os.getcwd()} - {cmd_text}\n{error_output}"
                 if not ignore_error_log:
                     logger.error(error_msg)
