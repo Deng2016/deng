@@ -1,5 +1,11 @@
 import os
-from aip import AipOcr
+try:
+    from aip import AipOcr
+except:
+    import time
+    os.system("pip install baidu-aip==2.2.18.0")
+    time.sleep(2)
+    from aip import AipOcr
 
 
 OCR_APP_ID = os.environ.get("OCR_APP_ID")
