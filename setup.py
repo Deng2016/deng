@@ -15,6 +15,8 @@ setup(
     author="dengqingyong",
     author_email="yu12377@163.com",
     packages=find_packages(),
+    long_description=open('readme.md', encoding="utf-8").read(),
+    long_description_content_type='text/markdown',
     exclude_package_data={"": [".gitignore"]},
     install_requires=[
         "requests==2.26.0",
