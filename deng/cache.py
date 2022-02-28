@@ -12,7 +12,7 @@ from typing import Union
 from redis import Redis, ConnectionPool
 
 from . import logger
-from .utils import byte_to_str
+from .utils import byte_to_str, get_caller_info
 from .encrypt import to_decode, sum_md5
 from .file import read_file_content, save_json_to_file
 
@@ -25,8 +25,10 @@ def get_cache_obj(db_index: int = 15):
         _redis = MyRedis(db_index)
     except Exception as _e:
         logger.exception(_e)
-        logger.warning(f"redis缓存不可用，启动本地文件缓存！")
-        return MyCache(Path(__file__).parent / "MyCookie.cache")
+        caller_info = get_caller_info(2)
+        __cache_path__ = Path(caller_info["file_abs_path"]).parent / "MySession.json"
+        logger.warning(f"redis缓存不可用，启动本地文件缓存：{__cache_path__}")
+        return MyCache(__cache_path__)
     else:
         logger.info(f"redis缓存初始成功！")
         return _redis
@@ -193,6 +195,26 @@ class MyCache(object):
 
     def hgetall(self, key: str):
         return self.get(key)
+
+    def hset(self, name, key=None, value=None, mapping=None):
+        if key is None and not mapping:
+            raise ValueError("'key'或'mapping'不能同时为空")
+
+        items = dict()
+        if key is not None:
+            items[key] = value
+        if mapping:
+            items.update(mapping)
+        self._dict[name] = items
+        self.save_cache()
+
+    def __getattr__(self, item):
+        logger.warning(f"本地文件类缓存没有实现{item}方法，忽略")
+
+        def __temp_func(*args, **kwargs):
+            pass
+
+        return __temp_func
 
 
 class MyDict(dict):

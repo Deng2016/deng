@@ -8,7 +8,7 @@ import logging
 import inspect
 import datetime
 import subprocess
-from typing import Sequence
+from typing import Sequence, Dict
 from pathlib import Path
 from decimal import Decimal
 from functools import wraps
@@ -150,16 +150,6 @@ class MyJSONEncoder(json.encoder.JSONEncoder):
         )
 
 
-def get_caller_info(level: int = 0) -> tuple:
-    """获取调用方名称与描述"""
-    # 获取调用方描述
-    desc = inspect.stack()[level + 1].frame.f_code.co_consts[0]
-    if desc:
-        desc = desc.split("\n")[0].strip()
-    func_name = inspect.stack()[level + 1].frame.f_code.co_name
-    return func_name, desc
-
-
 def byte_to_str(src, encoding=None) -> str:
     if isinstance(src, bytes):
         error_list = []
@@ -233,3 +223,45 @@ def stat_func_elapsed(func):
         return res
 
     return _stat_func_elapsed
+
+
+def get_caller_info(depth: int) -> Dict[str, str]:
+    """获取调用方名称与描述
+    :param depth: int, 函数调用栈递归深度，当前方法为0，依次往上递增
+    """
+    # 获取调用方描述
+    from_obj = inspect.stack()[depth]
+
+    _filename = Path(from_obj.filename).name
+    _lineno = from_obj.lineno
+    _func_name = from_obj.function
+
+    _func_desc = from_obj.frame.f_code.co_consts[0]
+    if _func_desc:
+        _func_desc = _func_desc.split("\n")[0].strip()
+    else:
+        _func_desc = ""
+    return {
+        "file_abs_path": from_obj.filename,
+        "filename": _filename,
+        "lineno": _lineno,
+        "func_name": _func_name,
+        "func_desc": _func_desc,
+        "output": f"[{_filename}/{_lineno}/{_func_name}/{_func_desc}]"
+    }
+
+
+def get_caller_desc(depth: int) -> str:
+    """获取调用者描述或名称
+    :param depth: int, 函数调用栈递归深度，当前方法为0，依次往上递增
+    """
+    try:
+        doc_str = inspect.stack()[depth].frame.f_code.co_consts[0]
+        if doc_str:
+            doc_str = doc_str.split("\n")[0].strip()
+        else:
+            doc_str = inspect.stack()[depth].frame.f_code.co_name
+        return doc_str
+    except Exception as err:
+        logger.exception(err)
+        return ""

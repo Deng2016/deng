@@ -32,13 +32,13 @@ session = requests.Session()
 def checkout_response(response: requests.Response):
     """检查请求响应"""
     if response.status_code == 403 or response.status_code == 401:
-        format_output(response, "error")
+        format_output(response, "error", depth=3)
         raise ValueError("权限认证失败，请检查！")
 
     if response.status_code >= 400:
-        format_output(response, "error")
+        format_output(response, "error", depth=3)
     else:
-        format_output(response, "debug")
+        format_output(response, "debug", depth=3)
         return response.json()
 
 

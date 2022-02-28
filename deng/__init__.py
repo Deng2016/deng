@@ -5,9 +5,6 @@ from typing import List, Union
 from pathlib import Path
 
 
-# 始终显示所有HTTP请求的详情
-ALWAYS_ECHO_RESULT = False
-
 log_format = logging.Formatter(
     "[%(asctime)s] %(filename)s/%(lineno)s/%(funcName)s/%(levelname)s: %(message)s"
 )

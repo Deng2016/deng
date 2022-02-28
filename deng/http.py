@@ -1,10 +1,12 @@
+import os
 import json
 import requests
 from urllib.parse import urlparse, unquote
 from requests.cookies import RequestsCookieJar
 from requests.structures import CaseInsensitiveDict
 
-from . import ALWAYS_ECHO_RESULT, logger
+from . import logger
+from .utils import get_caller_info
 
 
 def parser_cookies_by_headers(headers: CaseInsensitiveDict):
@@ -18,47 +20,51 @@ def parser_cookies_by_headers(headers: CaseInsensitiveDict):
 
 
 def check_response(
-    response: requests.Response, operate=r"请求", ignore_error=True
+    response: requests.Response, operate="", ignore_error=True, echo=False
 ) -> bool:
     """检查response是否成功"""
     if response.status_code == 200:
         content_type = response.headers.get("content-type")
         if content_type and "json" in content_type:
-            operate = operate.split("\n")[0]
+            if not operate:
+                _info = get_caller_info(2)
+                operate = f"调用{_info['output']})"
             if response.json().get("code") == 0:
                 status = True
             elif response.json().get("success"):
                 status = True
             else:
-                msg = f"【{operate}】失败，错误详情：{response.text}"
+                msg = f"{operate}失败，错误详情：{response.text}"
                 if ignore_error:
                     status = False
                     logger.error(msg)
                 else:
-                    format_output(response, level="error")
+                    format_output(response, level="error", depth=3)
                     raise ValueError(msg)
 
             # 根据请求结果与调试标志输出
-            if not status or ALWAYS_ECHO_RESULT:
+            if not status or echo or os.environ.get("ALWAYS_ECHO_RESULT"):
                 if status:
                     level = "debug"
                 else:
                     level = "error"
-                format_output(response, level=level)
+                format_output(response, level=level, depth=3)
             return status
         else:
             return True
     else:
         if ignore_error:
-            format_output(response, level="warning")
+            format_output(response, level="warning", depth=3)
             return False
         else:
-            format_output(response, level="error")
+            format_output(response, level="error", depth=3)
             raise ValueError(response.text)
 
 
-def format_output(obj, level="debug"):
+def format_output(obj, level="debug", depth=2):
+    _info = get_caller_info(depth)
     _logger = getattr(logger, level)
+    _logger(f"格式化输出调用源：{_info['output']}")
     if isinstance(obj, (dict, list, tuple)):
         _logger(json.dumps(obj, ensure_ascii=False, indent=4))
     elif isinstance(obj, requests.Response):
@@ -103,11 +109,15 @@ def clean_null_key_for_dict(my_dict: dict):
 
 
 def parse_url_to_dict(url: str, _all=True, unquote_count: int = 0) -> dict:
-    for _ in range(unquote_count):
-        url = unquote(url)
+    url = unquote_url(url, unquote_count)
+
     url_obj = urlparse(url)
     query_str = url_obj.query
-    url_dict = {item.split("=")[0]: item.split("=")[1] for item in query_str.split("&")}
+    try:
+        url_dict = {item.split("=")[0]: item.split("=")[1] for item in query_str.split("&")}
+    except:
+        logger.error(f"解析URL地址出错：{url}")
+        raise
     if _all:
         url_dict["scheme"] = url_obj.scheme
         url_dict["netloc"] = url_obj.netloc
@@ -138,3 +148,19 @@ def query_str_to_dict(_str: str):
             key, values = item.split("=", 1)
         payload[key] = values
     return payload
+
+
+def unquote_url(url, unquote_count: int = 0) -> str:
+    """解析URL"""
+    if unquote_count > 0:
+        # 按指定的循环次数解码
+        for _ in range(unquote_count):
+            url = unquote(url)
+    else:
+        # 自动解码
+        while True:
+            _before_url = url
+            url = unquote(url)
+            if _before_url == url:
+                break
+    return url

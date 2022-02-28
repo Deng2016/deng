@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 
 PACKAGE_NAME = "deng"
-PACKAGE_VERSION = "2022.2.22.1"
+PACKAGE_VERSION = "2022.2.28.1"
 
 setup(
     name=PACKAGE_NAME,
@@ -17,7 +17,7 @@ setup(
     packages=find_packages(),
     long_description=open('readme.md', encoding="utf-8").read(),
     long_description_content_type='text/markdown',
-    exclude_package_data={"": [".gitignore"]},
+    exclude_package_data={"": [".gitignore", "lab.py"]},
     install_requires=[
         "requests==2.26.0",
         "requests-html==0.10.0",
