@@ -109,21 +109,23 @@ def clean_null_key_for_dict(my_dict: dict):
 
 
 def parse_url_to_dict(url: str, _all=True, unquote_count: int = 0) -> dict:
+    """将url解析成字典"""
+    payload = dict()
     url = unquote_url(url, unquote_count)
-
     url_obj = urlparse(url)
-    query_str = url_obj.query
-    try:
-        url_dict = {item.split("=")[0]: item.split("=")[1] for item in query_str.split("&")}
-    except:
-        logger.error(f"解析URL地址出错：{url}")
-        raise
     if _all:
-        url_dict["scheme"] = url_obj.scheme
-        url_dict["netloc"] = url_obj.netloc
-        url_dict["path"] = url_obj.path
-        url_dict["fragment"] = url_obj.fragment
-    return url_dict
+        payload["scheme"] = url_obj.scheme
+        payload["netloc"] = url_obj.netloc
+        payload["path"] = url_obj.path
+        payload["params"] = url_obj.params
+        payload["query"] = url_obj.query
+        payload["fragment"] = url_obj.fragment
+
+    query_dict = query_str_to_dict(url_obj.query)
+    fragment_dict = query_str_to_dict(url_obj.fragment)
+    payload.update(query_dict)
+    payload.update(fragment_dict)
+    return payload
 
 
 def pop_key_from_dict(my_dict: dict, key, default=None):
@@ -134,19 +136,24 @@ def pop_key_from_dict(my_dict: dict, key, default=None):
     return value
 
 
-def query_str_to_dict(_str: str):
+def query_str_to_dict(_str: str) -> dict:
     """将URL查询字符串转换成dict"""
-    _str = unquote(_str)
-    items = _str.split("&")
-    payload = {}
-    for item in items:
-        try:
-            key, values = item.split("=")
-        except ValueError as e:
-            logger.warning("拆包时出现异常，可能是字符串中存在多个【=】导致，启用备用方案拆包：忽略第2个及以后的【=】字符")
-            logger.warning("原始字符串：{}".format(item))
-            key, values = item.split("=", 1)
-        payload[key] = values
+    payload = dict()
+    if _str:
+        _str = unquote(_str)
+
+        while "?" in _str:
+            _key, _str = _str.split("?", 1)
+            logger.warning(f"剥离{_key}")
+
+        for item in _str.split("&"):
+            try:
+                key, values = item.split("=")
+            except ValueError as e:
+                logger.warning("拆包时出现异常，可能是字符串中存在多个【=】导致，启用备用方案拆包：忽略第2个及以后的【=】字符")
+                logger.warning("原始字符串：{}".format(item))
+                key, values = item.split("=", 1)
+            payload[key] = values
     return payload
 
 

@@ -273,7 +273,11 @@ def copy_to_target_by_pattern(
 
 
 def read_file_stream(file_path: str, start_index, end_index):
-    """读取文件流"""
+    """读取文件流
+    :param file_path: str, 文件路径
+    :param start_index: int, 读取起始位置
+    :param end_index: int, 读取结尾位置
+    """
     check_path_is_exits(file_path, path_type="file")
     with open(file_path, mode="rb") as _file:
         _file.seek(start_index)
@@ -281,7 +285,11 @@ def read_file_stream(file_path: str, start_index, end_index):
 
 
 def read_file_raw_content(file_path: Union[str, Path], encoding=None) -> tuple:
-    """读取文件内容"""
+    """读取文件内容
+    :param file_path: 文件路径
+    :param encoding: 文件字符编码，没有指定时会按照utf-8，GBK，GB2312，GB18030依次读取
+    :return 返回文件类型与读取成功的文件编码
+    """
     check_path_is_exits(file_path)
     file_path = Path(file_path)
 
@@ -302,7 +310,13 @@ def read_file_raw_content(file_path: Union[str, Path], encoding=None) -> tuple:
 
 
 def read_file_content(file_path: Union[Path, str], encoding=None, _return=None, default=None):
-    """读取文件内容"""
+    """读取文件内容
+    :param file_path: 文件路径
+    :param encoding: 文件字符编码，没有指定时会按照utf-8，GBK，GB2312，GB18030依次读取
+    :param _return: 为json时返回json格式数据，否则返回str
+    :param default: 文件内容为空时返回的默认值
+    :return 返回文件类型与读取成功的文件编码
+    """
     if default is None:
         default = {}
     _raw_content, _ = read_file_raw_content(file_path, encoding)
@@ -316,17 +330,22 @@ def read_file_content(file_path: Union[Path, str], encoding=None, _return=None, 
         return _raw_content
 
 
-def save_obj_to_file(obj, file_abs_path: str, exist_ok=True):
-    """保存对象到文件"""
+def save_obj_to_file(obj, file_abs_path: str, exist_ok=True, encoding="utf-8"):
+    """保存对象到文件
+    :param obj: 待保存对象，仅限文件对象，不能是二进制对象
+    :param file_abs_path: 保存路径
+    :param exist_ok: 为True时覆盖已经存在的文件，为False时抛错
+    :param encoding: 文件编码
+    """
     if isinstance(obj, (dict, list, tuple)):
-        return save_json_to_file(obj, file_abs_path, exist_ok)
+        return save_json_to_file(obj, file_abs_path, exist_ok, encoding)
 
     if isinstance(obj, bytes):
-        obj = obj.decode("utf-8")
+        obj = obj.decode(encoding)
     else:
         obj = str(obj)
 
-    with open(file_abs_path, mode="w", encoding="utf-8") as _file:
+    with open(file_abs_path, mode="w", encoding=encoding) as _file:
         return _file.write(obj)
 
 
@@ -339,7 +358,15 @@ def save_json_to_file(
     indent=2,
     cls=None,
 ):
-    """将字典、列表、元组保存到文件中"""
+    """将字典、列表、元组保存到文件中
+    :param content: 待保存对象，仅限dict,list,tuple
+    :param file_abs_path: 保存路径
+    :param exist_ok: 为True时覆盖已经存在的文件，为False时抛错
+    :param encoding: 文件编码
+    :param ensure_ascii:
+    :param indent: int, 格式化JSON对象时缩进字符数量
+    :param cls: json dumps 的转换类
+    """
     file_abs_path = Path(file_abs_path)
     if not exist_ok:
         if file_abs_path.exists():

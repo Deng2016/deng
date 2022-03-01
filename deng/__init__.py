@@ -80,4 +80,4 @@ def configure_logger(
         file_handler.setLevel(level)
         logger.addHandler(file_handler)
 
-    logger.info("日志配置完成")
+    logger.debug("日志配置完成")

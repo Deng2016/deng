@@ -30,7 +30,7 @@ def get_cache_obj(db_index: int = 15):
         logger.warning(f"redis缓存不可用，启动本地文件缓存：{__cache_path__}")
         return MyCache(__cache_path__)
     else:
-        logger.info(f"redis缓存初始成功！")
+        logger.debug(f"redis缓存初始成功！")
         return _redis
 
 
