@@ -42,7 +42,6 @@ def md5sum(*, _file_path: str = None, _string: str = None):
 
 
 class MyCrypto(object):
-
     @classmethod
     def encrypt(cls, data, xsrf_token=None, old_secret=None) -> str:
         """加密"""
@@ -85,3 +84,35 @@ class MyCrypto(object):
     def sha256(cls, data):
         """sha256加密"""
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def aes_cbc_encrypt(key, content, iv):
+        """AES CBC加密"""
+
+        def __pad(text):
+            bs = 16
+            padding_size = len(text.encode("utf-8"))
+            padding = bs - padding_size % bs
+            padding_text = chr(padding) * padding
+            return text + padding_text
+
+        cipher = AES.new(key.encode("utf-8"), AES.MODE_CBC, iv.encode("utf-8"))
+        # 处理明文
+        content_padding = __pad(content)
+        # 加密
+        encrypt_bytes = cipher.encrypt(content_padding.encode("utf-8"))
+        # 重新编码
+        result = str(base64.b64encode(encrypt_bytes), encoding="utf-8")
+        return result
+
+    @staticmethod
+    def aes_cbc_decrypt(key, content, iv):
+        """AES CBC解密"""
+
+        def __un_pad(_s):
+            return _s[: -ord(_s[len(_s) - 1 :])]
+
+        cipher = AES.new(key.encode("utf-8"), AES.MODE_CBC, iv.encode("utf-8"))
+        content = base64.b64decode(content)
+        text = cipher.decrypt(content).decode("utf-8")
+        return __un_pad(text)
