@@ -21,7 +21,7 @@ setup(
     install_requires=[
         "requests==2.26.0",
         "requests-html==0.10.0",
-        "redis==3.5.3",
+        "redis==4.4.4",
         "pycryptodome==3.11.0",
         "xpinyin==0.7.6",
         "pysmb==1.2.6",
