@@ -19,7 +19,7 @@ setup(
     long_description_content_type='text/markdown',
     exclude_package_data={"": [".gitignore", "lab.py"]},
     install_requires=[
-        "requests==2.26.0",
+        "requests==2.31.0",
         "requests-html==0.10.0",
         "redis==3.5.3",
         "pycryptodome==3.11.0",
